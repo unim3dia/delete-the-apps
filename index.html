@@ -105,9 +105,9 @@ button{font:inherit;border:0;cursor:pointer}
 .callout::after{content:"";position:absolute;left:50%;bottom:-5px;width:11px;height:11px;background:inherit;transform:translateX(-50%) rotate(45deg);border-radius:2px}
 @keyframes bob{50%{margin-top:-4px}}
 .clock{font-family:var(--display);font-size:13px!important;letter-spacing:.16em;color:var(--hot);text-transform:uppercase}
-#lvPrev{width:100%;max-width:340px;height:auto;aspect-ratio:2/1;margin:4px 0}
+#lvPrev{width:100%;max-width:340px;height:auto;aspect-ratio:600/220;margin:0}
 .lvcard{border:6px solid transparent;background:linear-gradient(180deg,color-mix(in srgb,var(--tint,#ffd23f) 38%,#fff),#fffaf0) padding-box,linear-gradient(90deg,#ff6a3d,#ffd23f,#34d399,#60a5fa,#c084fc,#f472b6) border-box;box-shadow:0 8px 0 #2b2440,0 24px 50px rgba(20,16,40,.45)}
-.lvcard{width:min(100%,380px);padding:20px 20px 18px;gap:10px}
+.lvcard{width:min(100%,380px);padding:22px 20px 20px;gap:12px;justify-content:center}
 .lvcard h2{font-size:52px;background:linear-gradient(180deg,#ffe066,#ff9a1f 60%,#ff6a1f);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #2b2440) drop-shadow(0 0 0 #2b2440)}
 .lvtop{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .lvpill{margin:0!important;padding:7px 16px;border-radius:999px;border:3px solid #2b2440;box-shadow:0 3px 0 #2b2440;background:linear-gradient(180deg,#ffe066,#ffb020);font:700 12px var(--body)!important;letter-spacing:.14em;text-transform:uppercase;color:#2b2440!important;opacity:1!important}
@@ -177,7 +177,7 @@ button{font:inherit;border:0;cursor:pointer}
   <div class="lvtop"><p class="lvpill" id="lvAct"></p><p class="lvpill clock" id="lvTime"></p></div>
   <p class="lvstat" id="lvStat" hidden></p>
   <h2 id="lvName"></h2>
-  <canvas id="lvPrev" width="600" height="300" aria-hidden="true"></canvas>
+  <canvas id="lvPrev" width="600" height="220" aria-hidden="true"></canvas>
   <p class="lvrule" id="lvRule"></p>
   <button class="go" id="lvGo">Start</button>
   <button class="ghost" id="lvMenu">Main menu</button>
@@ -1123,7 +1123,7 @@ const PREVIEW={
 };
 function drawLevelPreview(l){
   const pc=$("lvPrev"),g=pc.getContext("2d"),W=pc.width,H=pc.height,a=APPS[l.types[0]];
-  const P=PREVIEW[l.name]||{tiles:[{}],end:"burst"},TS=110,GAP=22,ROW=H/2-TS/2,n=P.tiles.length,x0=P.at??28;
+  const P=PREVIEW[l.name]||{tiles:[{}],end:"burst"},TS=120,GAP=18,ROW=(H-TS)/2,n=P.tiles.length,x0=P.at??20;
   const faceOf=t=>t.f==="grey"?greyFace(a,TS):t.f==="plan"?planFace(0,TS):t.f==="box"?boxFace(0,TS):faceCanvas(a,TS);
   const badge=(x,y,label)=>{g.fillStyle="#fff";g.beginPath();g.arc(x,y,26,0,7);g.fill();g.fillStyle="#ff3b30";g.beginPath();g.arc(x,y,21,0,7);g.fill();
     g.fillStyle="#fff";g.font='700 28px "Instrument Sans", system-ui, sans-serif';g.textAlign="center";g.textBaseline="middle";g.fillText(label,x,y+2)};
