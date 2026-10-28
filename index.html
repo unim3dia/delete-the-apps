@@ -106,13 +106,15 @@ button{font:inherit;border:0;cursor:pointer}
 @keyframes bob{50%{margin-top:-4px}}
 .clock{font-family:var(--display);font-size:13px!important;letter-spacing:.16em;color:var(--hot);text-transform:uppercase}
 #lvPrev{width:100%;max-width:340px;height:auto;aspect-ratio:2/1;margin:4px 0}
-.lvcard{background:linear-gradient(180deg,#fff7e6,#ffe9c7);border:4px solid #2b2440;box-shadow:0 8px 0 #2b2440,0 24px 50px rgba(20,16,40,.45)}
+.lvcard{border:6px solid transparent;background:linear-gradient(180deg,color-mix(in srgb,var(--tint,#ffd23f) 38%,#fff),#fffaf0) padding-box,linear-gradient(90deg,#ff6a3d,#ffd23f,#34d399,#60a5fa,#c084fc,#f472b6) border-box;box-shadow:0 8px 0 #2b2440,0 24px 50px rgba(20,16,40,.45)}
 .lvcard{width:min(100%,380px);padding:20px 20px 18px;gap:10px}
 .lvcard h2{font-size:52px;background:linear-gradient(180deg,#ffe066,#ff9a1f 60%,#ff6a1f);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #2b2440) drop-shadow(0 0 0 #2b2440)}
 .lvtop{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .lvpill{margin:0!important;padding:7px 16px;border-radius:999px;border:3px solid #2b2440;box-shadow:0 3px 0 #2b2440;background:linear-gradient(180deg,#ffe066,#ffb020);font:700 12px var(--body)!important;letter-spacing:.14em;text-transform:uppercase;color:#2b2440!important;opacity:1!important}
 .lvpill.clock{font-family:var(--display)!important;font-size:13px!important;color:#fff!important;text-shadow:0 2px 0 #2b2440;background:linear-gradient(90deg,#34d399,#60a5fa,#c084fc,#f472b6,#fbbf24)}
 .lvrule{font-size:15px;font-weight:700;max-width:30ch;color:#2b2440}
+.lvstat{font-size:14px;font-weight:700;max-width:30ch;color:#2b2440;margin:0!important}
+.lvstat .stars{font-size:24px;display:block}
 .lvcard #lvGo{font-size:24px;padding:16px 48px;background:linear-gradient(180deg,#ff8a4c,#ff4d2e);box-shadow:0 6px 0 #b8330f,0 0 0 3px #2b2440;color:#fff;text-shadow:0 2px 0 #b8330f}
 .lvcard #lvGo::after{content:" \25B6";font-size:.75em}
 .lvcard #lvGo:active{box-shadow:0 2px 0 #b8330f,0 0 0 3px #2b2440}
@@ -175,6 +177,7 @@ button{font:inherit;border:0;cursor:pointer}
 
 <div class="overlay" id="levelO" hidden><div class="card lvcard">
   <div class="lvtop"><p class="lvpill" id="lvAct"></p><p class="lvpill clock" id="lvTime"></p></div>
+  <p class="lvstat" id="lvStat" hidden></p>
   <h2 id="lvName"></h2>
   <canvas id="lvPrev" width="600" height="300" aria-hidden="true"></canvas>
   <p class="lvrule" id="lvRule"></p>
@@ -1101,8 +1104,9 @@ function setupLevel(i){
   if(i===2){let A,B;script.push({at:.2,fn:()=>{A=takeFromQueue(()=>true);B=takeFromQueue(x=>x!==A);spawn(A,0);spawn(B,2)}},{at:1.4,fn:()=>spawnAlgo(1,A)})}
 }
 function showIntro(i){
-  setupLevel(i);setMode("intro");$("hud").hidden=true;$("dock").hidden=true;$("endO").hidden=true;
+  setupLevel(i);setMode("intro");$("hud").hidden=true;$("dock").hidden=true;$("endO").hidden=true;$("lvStat").hidden=true;
   const l=LEVELS[i];let ai=i;while(!LEVELS[ai].chapter)ai--;const ch=LEVELS[ai].chapter;$("lvTime").textContent=l.time;$("lvAct").textContent=`${ACTS[ch].n} · ${ch}`;$("lvName").textContent=l.name;$("lvRule").textContent=l.rule;
+  $("levelO").querySelector(".lvcard").style.setProperty("--tint",l.sky.hor);
   drawLevelPreview(l);
   $("levelO").hidden=false;tone(392,.3,"sine",.05,523);
 }
@@ -1129,6 +1133,14 @@ function drawLevelPreview(l){
     g.strokeStyle=gr;g.lineWidth=9;g.lineCap="round";g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
     const t=Math.atan2(y2-y1,x2-x1);g.fillStyle="#ff4fa3";g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-22*Math.cos(t-.45),y2-22*Math.sin(t-.45));g.lineTo(x2-22*Math.cos(t+.45),y2-22*Math.sin(t+.45));g.closePath();g.fill()};
   const burst=(cx,cy,r,col)=>{g.fillStyle=col;g.beginPath();for(let k=0;k<16;k++){const rr=k%2?r*.55:r,t=-Math.PI/2+k*Math.PI/8;g.lineTo(cx+Math.cos(t)*rr,cy+Math.sin(t)*rr)}g.closePath();g.fill()};
+  const puff=(cx,cy,r)=>{const pts=[];for(let k=0;k<8;k++){const t=k*Math.PI/4;pts.push([cx+Math.cos(t)*r*.62,cy+Math.sin(t)*r*.62])}
+    g.fillStyle="#2b2440";for(const[x,y]of pts){g.beginPath();g.arc(x,y,r*.4+4,0,7);g.fill()}g.beginPath();g.arc(cx,cy,r*.8+4,0,7);g.fill();
+    g.fillStyle="#fff";for(const[x,y]of pts){g.beginPath();g.arc(x,y,r*.4,0,7);g.fill()}g.beginPath();g.arc(cx,cy,r*.8,0,7);g.fill()};
+  const trash=(cx,cy,s)=>{g.save();g.translate(cx,cy);g.fillStyle="#9aa6c2";g.strokeStyle="#2b2440";g.lineWidth=5;g.lineJoin="round";
+    rrPath(g,-s*.42,-s*.5,s*.84,s*.14,s*.05);g.fill();g.stroke();
+    rrPath(g,-s*.14,-s*.62,s*.28,s*.14,s*.05);g.fill();g.stroke();
+    g.beginPath();g.moveTo(-s*.34,-s*.34);g.lineTo(s*.34,-s*.34);g.lineTo(s*.27,s*.5);g.lineTo(-s*.27,s*.5);g.closePath();g.fill();g.stroke();
+    g.lineWidth=4;for(const x of[-.16,0,.16]){g.beginPath();g.moveTo(x*s,-s*.22);g.lineTo(x*s*.9,s*.36);g.stroke()}g.restore()};
   const sparkle=(x,y,s,col)=>{g.fillStyle=col;g.beginPath();for(let k=0;k<8;k++){const rr=k%2?s*.3:s,t=-Math.PI/2+k*Math.PI/4;g.lineTo(x+Math.cos(t)*rr,y+Math.sin(t)*rr)}g.closePath();g.fill()};
   const ring=(cx,cy)=>{g.fillStyle="rgba(16,16,30,.55)";g.beginPath();g.arc(cx,cy,52,0,7);g.fill();g.strokeStyle="#fff";g.lineWidth=6;g.beginPath();g.arc(cx,cy,40,0,7);g.stroke();
     g.fillStyle="#fff";g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,33,-Math.PI/2,-Math.PI/2+Math.PI*1.25);g.closePath();g.fill()};
@@ -1146,7 +1158,7 @@ function drawLevelPreview(l){
   else if(P.end==="dissolve"){g.fillStyle="#ffd9e6";for(let k=0;k<18;k++){const x=endX+Math.sin(k*2.3)*46,y=endY+Math.cos(k*1.7)*40;g.globalAlpha=.3+.5*(k%3)/2;g.beginPath();g.arc(x,y,4+(k%4)*2,0,7);g.fill()}g.globalAlpha=1;arrow(lastX+14,H/2,endX-60,H/2)}
   else{arrow(lastX+14,H/2,endX-60,H/2);
     if(P.end==="ring")ring(endX,endY);
-    else{burst(endX,endY,58,"#2b2440");burst(endX,endY,52,"#ffd23f");burst(endX,endY,36,"#ff6a3d")}
+    else{puff(endX,endY,62);trash(endX,endY+4,74)}
     sparkle(endX+58,endY-52,11,"#f472b6");sparkle(endX-60,endY+50,9,"#34d399");sparkle(endX+62,endY+46,8,"#60a5fa")}
 }
 function rrPath(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
@@ -1168,7 +1180,8 @@ function levelDone(){
     $("endh").textContent=nx.enterH||`${L.name}, cleared.`;$("endstat").innerHTML=`<span class="stars">${stars(st)}</span>`;
     $("endp").textContent=`${fmt(screen)} of screen time. `+(nx.enterP||nx.cue||`It's ${nx.time} and they're back.`);
     $("next").textContent=`Next: ${LEVELS[lvl+1].name}`;$("next").hidden=false;$("again").textContent="Replay";againAction=()=>{setupLevel(lvl);beginLevel()};
-    setTimeout(()=>{$("endO").hidden=false},1500);
+    const statHtml=`<span class="stars">${stars(st)}</span>${nx.enterH?`${nx.enterH} ${nx.enterP||""}`:`${L.name} cleared · ${fmt(screen)} of screen time`}`;
+    setTimeout(()=>{showIntro(lvl+1);$("lvStat").innerHTML=statHtml;$("lvStat").hidden=false},1500);
   }else{
     freed=true;setMood(DAWN,DAWN_LIGHT,4);setTimeout(()=>{$("hud").hidden=true},2000);$("endAct").hidden=false;$("endAct").textContent="7:02 AM";
     $("veil").className="veil";if(L.rem){for(let k=edge+3,j=0;k<ROWS;k++,j++)dissolveRoadRow(k,500+j*120);sunG.visible=true;sunT=0}
@@ -1232,7 +1245,6 @@ addEventListener("keydown",e=>{if(e.key==="Escape"||e.key==="p"){if(playing())pa
 document.addEventListener("visibilitychange",()=>{if(document.hidden)pauseGame()});
 $("fresh").addEventListener("click",()=>{progress.unlocked=0;save();startLabel();goLevel(0)});
 $("lvGo").addEventListener("click",()=>{initAudio();beginLevel()});
-$("next").addEventListener("click",()=>showIntro(lvl+1));
 $("again").addEventListener("click",()=>{if(againAction)againAction()});
 $("last").addEventListener("click",e=>{
   const b=e.currentTarget,sea=!!L.sea;b.classList.add(sea?"sink":"boom");
@@ -1273,6 +1285,9 @@ function frame(){
 }
 buildAppMats();
 requestAnimationFrame(frame);
+// card-sheet preview: index.html?card=N opens level N's card straight away
+const cardPreview=new URLSearchParams(location.search).get("card");
+if(cardPreview!==null){$("startO").hidden=true;showIntro(+cardPreview)}
 
 </script>
 
