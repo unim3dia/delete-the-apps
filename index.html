@@ -134,7 +134,7 @@ button{font:inherit;border:0;cursor:pointer}
 <div class="tide" id="tide"></div>
 <div class="veil" id="veil"></div>
 <div class="hud" id="hud" hidden>
-  <div class="pill"><span id="lvLabel">8:41 AM</span><b><span id="count">0/5</span> <small>deleted</small></b></div>
+  <div class="pill"><span id="lvLabel">Level 1 of 10</span><b><span id="count">0/5</span> <small>deleted</small></b></div>
   <button class="pbtn" id="pause" type="button" aria-label="Pause"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><rect x="1" y="1" width="4" height="14" rx="1.5" fill="#fff"/><rect x="9" y="1" width="4" height="14" rx="1.5" fill="#fff"/></svg></button>
   <div class="pill" style="text-align:right">Screen time<b id="st">0m</b><div class="meter"><i id="meter"></i></div></div>
 </div>
@@ -144,13 +144,12 @@ button{font:inherit;border:0;cursor:pointer}
 
 <div class="welcome" id="startO">
   <div class="wtop">
-    <p class="clock wclock">8:41 AM</p>
     <h1 class="wtitle">Delete<br>the <span>Apps</span></h1>
     <p class="wtag">A game about getting your time back.</p>
   </div>
   <div class="wbot">
     <button class="go big" id="start">Play</button>
-    <p class="wsub" id="wSub">One day · 3 acts · 10 levels</p>
+    <p class="wsub" id="wSub">10 levels</p>
     <div class="wrow"><button class="chip" id="openMap" type="button">Levels</button><button class="chip" id="openHow" type="button">How to play</button><button class="chip" id="mute" type="button">Sound on</button></div>
   </div>
 </div>
@@ -170,7 +169,6 @@ button{font:inherit;border:0;cursor:pointer}
     <li id="ruleClose"><span><b>Tap</b> or flick up to send an app away. It comes back later.</span></li>
     <li><span><b>Swipe sideways</b> to switch lanes. <b>Swipe down</b> to bring an app to you.</span></li>
     <li><span>If a lane fills up, an app installs and adds screen time.</span></li>
-    <li><span>Three acts: <b>Awake</b>, <b>Dreams</b>, <b>Deep Sleep</b>. Each level adds one new idea.</span></li>
   </ul>
   <button class="go" id="howBack">Got it</button>
 </div></div>
@@ -1028,7 +1026,7 @@ let bannerHide;
 function pushBanner(){
   const live=TYPES.filter(t=>remaining[t]>0);if(!live.length)return;const t=live[Math.floor(Math.random()*live.length)],a=APPS[t],[c0,c1]=grad(a);bannerApp=t;
   $("bi").style.background=`linear-gradient(145deg,${c0},${c1})`;$("bi").innerHTML=`<img src="${ICON_URL[a[1]]}" alt="" width="22" height="22">`;
-  $("bt").innerHTML=`<b>${a[0]} · ${L.time}</b>${a[4]}`;$("banner").classList.add("show");
+  $("bt").innerHTML=`<b>${a[0]} · ${L.name}</b>${a[4]}`;$("banner").classList.add("show");
   tone(1320,.08,"sine",.05);setTimeout(()=>tone(1760,.1,"sine",.05),90);
   clearTimeout(bannerHide);bannerHide=setTimeout(hideBanner,3200);
 }
@@ -1039,7 +1037,7 @@ $("banner").addEventListener("pointerdown",e=>{e.stopPropagation();if(bannerApp<
 
 // ---------- HUD / toasts / sound ----------
 const fmt=m=>m>=60?`${Math.floor(m/60)}h${m%60?` ${m%60}m`:""}`:`${m}m`;
-function hud(){$("lvLabel").textContent=L.time;$("count").textContent=`${uninstalled}/${TYPES.length}`;$("st").textContent=fmt(screen);$("meter").style.width=Math.min(100,screen/MAXMIN*100)+"%"}
+function hud(){$("lvLabel").textContent=`Level ${lvl+1} of ${LEVELS.length}`;$("count").textContent=`${uninstalled}/${TYPES.length}`;$("st").textContent=fmt(screen);$("meter").style.width=Math.min(100,screen/MAXMIN*100)+"%"}
 function toast(t){document.querySelectorAll(".toast").forEach(d=>d.remove());const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1000)}
 let ac;
 function tone(f,d,type="square",v=.06,slide=0){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(slide,ac.currentTime+d);g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}
@@ -1105,7 +1103,7 @@ function setupLevel(i){
 }
 function showIntro(i){
   setupLevel(i);setMode("intro");$("hud").hidden=true;$("dock").hidden=true;$("endO").hidden=true;$("lvStat").hidden=true;
-  const l=LEVELS[i];let ai=i;while(!LEVELS[ai].chapter)ai--;const ch=LEVELS[ai].chapter;$("lvTime").textContent=l.time;$("lvAct").textContent=`${ACTS[ch].n} · ${ch}`;$("lvName").textContent=l.name;$("lvRule").textContent=l.rule;
+  const l=LEVELS[i];$("lvTime").hidden=true;$("lvAct").textContent=`Level ${i+1} of ${LEVELS.length}`;$("lvName").textContent=l.name;$("lvRule").textContent=l.rule;
   $("levelO").querySelector(".lvcard").style.setProperty("--tint",l.sky.hor);
   drawLevelPreview(l);
   $("levelO").hidden=false;tone(392,.3,"sine",.05,523);
@@ -1180,10 +1178,10 @@ function levelDone(){
     $("endh").textContent=nx.enterH||`${L.name}, cleared.`;$("endstat").innerHTML=`<span class="stars">${stars(st)}</span>`;
     $("endp").textContent=`${fmt(screen)} of screen time. `+(nx.enterP||nx.cue||`It's ${nx.time} and they're back.`);
     $("next").textContent=`Next: ${LEVELS[lvl+1].name}`;$("next").hidden=false;$("again").textContent="Replay";againAction=()=>{setupLevel(lvl);beginLevel()};
-    const statHtml=`<span class="stars">${stars(st)}</span>${nx.enterH?`${nx.enterH} ${nx.enterP||""}`:`${L.name} cleared · ${fmt(screen)} of screen time`}`;
+    const statHtml=`<span class="stars">${stars(st)}</span>${L.name} cleared`;
     setTimeout(()=>{showIntro(lvl+1);$("lvStat").innerHTML=statHtml;$("lvStat").hidden=false},1500);
   }else{
-    freed=true;setMood(DAWN,DAWN_LIGHT,4);setTimeout(()=>{$("hud").hidden=true},2000);$("endAct").hidden=false;$("endAct").textContent="7:02 AM";
+    freed=true;setMood(DAWN,DAWN_LIGHT,4);setTimeout(()=>{$("hud").hidden=true},2000);$("endAct").hidden=true;
     $("veil").className="veil";if(L.rem){for(let k=edge+3,j=0;k<ROWS;k++,j++)dissolveRoadRow(k,500+j*120);sunG.visible=true;sunT=0}
     const daily=ALL_TYPES.reduce((s,t)=>s+APPS[t][3],0);dayBack=daily;
     $("endh").textContent="Nothing left.";$("endstat").textContent=`${fmt(daily)} a day, back.`;
@@ -1206,11 +1204,11 @@ const initAudio=()=>{try{ac=ac||new (window.AudioContext||window.webkitAudioCont
 // returning players pick up where they left off
 function reach(){if(progress.all)return LEVELS.length-1;const st=progress.stars.reduce((m,v,i)=>v>0?Math.max(m,i+1):m,0);return Math.min(LEVELS.length-1,Math.max(progress.unlocked||0,st))}
 function startLabel(){const u=progress.unlocked||0;$("start").textContent="Play";
-  $("wSub").textContent=u>0?"Starts at 8:41 AM · your progress is in Levels":"One day · 3 acts · 10 levels";$("fresh").hidden=!(u>0||progress.stars.some(v=>v>0))}
+  $("wSub").textContent=u>0?"Your progress is in Levels":"10 levels";$("fresh").hidden=!(u>0||progress.stars.some(v=>v>0))}
 function renderMap(){const d=$("lvlist");d.innerHTML="";const r=reach(),next=progress.unlocked||0;
   LEVELS.forEach((l,i)=>{if(l.chapter){const h=document.createElement("p");h.className="chap";h.innerHTML=`${ACTS[l.chapter].n} · ${l.chapter}<small>${ACTS[l.chapter].sub}</small>`;d.appendChild(h)}
     const b=document.createElement("button");b.type="button";b.className="lvrow"+(i===next?" next":"");b.disabled=i>r;const st=progress.stars[i]||0;
-    b.innerHTML=`<span class="n">${i+1}</span><span class="meta"><b>${l.name}</b><small>${l.time} · new: ${l.learn}</small></span><span class="st">${i>r?"Locked":st?"★".repeat(st)+"☆".repeat(3-st):i===next?"Play":""}</span>`;
+    b.innerHTML=`<span class="n">${i+1}</span><span class="meta"><b>${l.name}</b><small>New: ${l.learn}</small></span><span class="st">${i>r?"Locked":st?"★".repeat(st)+"☆".repeat(3-st):i===next?"Play":""}</span>`;
     b.addEventListener("click",()=>{$("mapO").hidden=true;goLevel(i)});d.appendChild(b)});
   $("unlockAll").textContent=progress.all?"Lock levels again":"Unlock all (testing)"}
 $("openMap").addEventListener("click",()=>{renderMap();$("startO").hidden=true;$("mapO").hidden=false});
@@ -1231,7 +1229,7 @@ function renderLevels(id="levels"){const d=$(id);if(!d)return;d.innerHTML="";LEV
   if(id==="pLevels"&&i===lvl)b.classList.add("cur");
   b.addEventListener("click",()=>goLevel(i));d.appendChild(b)})}
 renderLevels();
-function pauseGame(){if(!playing())return;setMode("pause");hideCallout();$("pTime").textContent=`${L.name} · ${L.time}`;renderLevels("pLevels");$("pauseO").hidden=false;tone(330,.08,"sine",.05)}
+function pauseGame(){if(!playing())return;setMode("pause");hideCallout();$("pTime").textContent=`Level ${lvl+1} of ${LEVELS.length}`;renderLevels("pLevels");$("pauseO").hidden=false;tone(330,.08,"sine",.05)}
 function resumeGame(){if(mode!=="pause")return;$("pauseO").hidden=true;setMode("play");tone(440,.08,"sine",.05)}
 function toMenu(){["pauseO","endO","levelO","mapO","howO"].forEach(id=>$(id).hidden=true);$("hud").hidden=true;$("dock").hidden=true;hideCallout();hideBanner();
   setupLevel(0);setMode("attract");startLabel();renderLevels();$("startO").hidden=false}
