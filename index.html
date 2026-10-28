@@ -180,7 +180,6 @@ button{font:inherit;border:0;cursor:pointer}
   <canvas id="lvPrev" width="600" height="220" aria-hidden="true"></canvas>
   <p class="lvrule" id="lvRule"></p>
   <button class="go" id="lvGo">Start</button>
-  <button class="ghost" id="lvMenu">Main menu</button>
 </div></div>
 
 <div class="overlay" id="endO" hidden><div class="card">
@@ -1237,7 +1236,7 @@ $("pause").addEventListener("click",e=>{e.stopPropagation();pauseGame()});
 $("pause").addEventListener("pointerdown",e=>e.stopPropagation());
 $("resume").addEventListener("click",resumeGame);
 $("restart").addEventListener("click",()=>{setupLevel(lvl);beginLevel()});
-$("menu").addEventListener("click",toMenu);$("endMenu").addEventListener("click",toMenu);$("lvMenu").addEventListener("click",toMenu);
+$("menu").addEventListener("click",toMenu);$("endMenu").addEventListener("click",toMenu);
 $("skip").addEventListener("click",()=>{$("pauseO").hidden=true;setMode("play");TYPES.forEach(t=>remaining[t]=0);uninstalled=TYPES.length;levelDone()});
 addEventListener("keydown",e=>{if(e.key==="Escape"||e.key==="p"){if(playing())pauseGame();else if(mode==="pause")resumeGame()}});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)pauseGame()});
