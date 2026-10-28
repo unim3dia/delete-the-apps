@@ -107,16 +107,17 @@ button{font:inherit;border:0;cursor:pointer}
 .clock{font-family:var(--display);font-size:13px!important;letter-spacing:.16em;color:var(--hot);text-transform:uppercase}
 #lvPrev{width:100%;max-width:340px;height:auto;aspect-ratio:600/220;margin:0}
 .lvcard{border:6px solid transparent;background:linear-gradient(180deg,color-mix(in srgb,var(--tint,#ffd23f) 38%,#fff),#fffaf0) padding-box,linear-gradient(90deg,#ff6a3d,#ffd23f,#34d399,#60a5fa,#c084fc,#f472b6) border-box;box-shadow:0 8px 0 #2b2440,0 24px 50px rgba(20,16,40,.45)}
-.lvcard{width:min(100%,380px);padding:22px 20px 20px;gap:12px;justify-content:center}
-.lvcard h2{font-size:52px;background:linear-gradient(180deg,#ffe066,#ff9a1f 60%,#ff6a1f);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #2b2440) drop-shadow(0 0 0 #2b2440)}
+.lvcard{width:min(100%,380px);padding:22px 20px 20px;gap:10px;justify-content:center}
+.lvcard h2{font-size:40px;line-height:1;background:linear-gradient(180deg,#ffe066,#ff9a1f 60%,#ff6a1f);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #2b2440) drop-shadow(0 0 0 #2b2440)}
 .lvtop{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .lvpill{margin:0!important;padding:7px 16px;border-radius:999px;border:3px solid #2b2440;box-shadow:0 3px 0 #2b2440;background:linear-gradient(180deg,#ffe066,#ffb020);font:700 12px var(--body)!important;letter-spacing:.14em;text-transform:uppercase;color:#2b2440!important;opacity:1!important}
 .lvpill.clock{font-family:var(--display)!important;font-size:13px!important;color:#fff!important;text-shadow:0 2px 0 #2b2440;background:linear-gradient(90deg,#34d399,#60a5fa,#c084fc,#f472b6,#fbbf24)}
 .lvrule{font-size:15px;font-weight:700;max-width:30ch;color:#2b2440}
 .lvstat{font-size:14px;font-weight:700;max-width:30ch;color:#2b2440;margin:0!important}
-.lvstat .stars{font-size:24px;display:block}
+.lvstat .stars{font-size:22px;line-height:1;display:block}
 .lvcard #lvGo{font-size:24px;padding:16px 48px;background:linear-gradient(180deg,#ff8a4c,#ff4d2e);box-shadow:0 6px 0 #b8330f,0 0 0 3px #2b2440;color:#fff;text-shadow:0 2px 0 #b8330f}
 .lvcard #lvGo::after{content:" \25B6";font-size:.75em}
+.lvcard #resume{font-size:24px;padding:16px 48px;background:linear-gradient(180deg,#ff8a4c,#ff4d2e);box-shadow:0 6px 0 #b8330f,0 0 0 3px #2b2440;color:#fff;text-shadow:0 2px 0 #b8330f}
 .lvcard #lvGo:active{box-shadow:0 2px 0 #b8330f,0 0 0 3px #2b2440}
 .lvcard .ghost{text-decoration:none;opacity:1;padding:10px 22px;border-radius:999px;border:3px solid #2b2440;background:linear-gradient(180deg,#7cb4ff,#4a7fd6);box-shadow:0 3px 0 #2b2440;font-family:var(--display);text-transform:uppercase;font-size:13px;letter-spacing:.04em;color:#fff;text-shadow:0 2px 0 #2b2440}
 .stars{font-size:32px;letter-spacing:.12em;color:#f2a91f}
@@ -194,14 +195,11 @@ button{font:inherit;border:0;cursor:pointer}
   <button class="ghost" id="endMenu">Main menu</button>
 </div></div>
 
-<div class="overlay" id="pauseO" hidden><div class="card">
-  <p class="clock" id="pTime"></p>
+<div class="overlay" id="pauseO" hidden><div class="card lvcard pausecard">
+  <div class="lvtop"><p class="lvpill clock" id="pTime"></p></div>
   <h2>Paused</h2>
   <button class="go" id="resume">Resume</button>
   <div class="row"><button class="ghost" id="restart">Restart level</button><button class="ghost" id="menu">Quit</button></div>
-  <p class="small">Jump to a level</p>
-  <div class="levels" id="pLevels"></div>
-  <button class="ghost" id="skip">Skip this level (test)</button>
 </div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1228,7 +1226,7 @@ function renderLevels(id="levels"){const d=$(id);if(!d)return;d.innerHTML="";LEV
   if(id==="pLevels"&&i===lvl)b.classList.add("cur");
   b.addEventListener("click",()=>goLevel(i));d.appendChild(b)})}
 renderLevels();
-function pauseGame(){if(!playing())return;setMode("pause");hideCallout();$("pTime").textContent=`Level ${lvl+1} of ${LEVELS.length}`;renderLevels("pLevels");$("pauseO").hidden=false;tone(330,.08,"sine",.05)}
+function pauseGame(){if(!playing())return;setMode("pause");hideCallout();$("pTime").textContent=`Level ${lvl+1} of ${LEVELS.length}`;$("pauseO").querySelector(".lvcard").style.setProperty("--tint",L.sky.hor);$("pauseO").hidden=false;tone(330,.08,"sine",.05)}
 function resumeGame(){if(mode!=="pause")return;$("pauseO").hidden=true;setMode("play");tone(440,.08,"sine",.05)}
 function toMenu(){["pauseO","endO","levelO","mapO","howO"].forEach(id=>$(id).hidden=true);$("hud").hidden=true;$("dock").hidden=true;hideCallout();hideBanner();
   setupLevel(0);setMode("attract");startLabel();renderLevels();$("startO").hidden=false}
@@ -1237,7 +1235,6 @@ $("pause").addEventListener("pointerdown",e=>e.stopPropagation());
 $("resume").addEventListener("click",resumeGame);
 $("restart").addEventListener("click",()=>{setupLevel(lvl);beginLevel()});
 $("menu").addEventListener("click",toMenu);$("endMenu").addEventListener("click",toMenu);
-$("skip").addEventListener("click",()=>{$("pauseO").hidden=true;setMode("play");TYPES.forEach(t=>remaining[t]=0);uninstalled=TYPES.length;levelDone()});
 addEventListener("keydown",e=>{if(e.key==="Escape"||e.key==="p"){if(playing())pauseGame();else if(mode==="pause")resumeGame()}});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)pauseGame()});
 $("fresh").addEventListener("click",()=>{progress.unlocked=0;save();startLabel();goLevel(0)});
