@@ -902,7 +902,7 @@ function toSea(c,dir,byWave){
 const crest=new THREE.Mesh(new THREE.SphereGeometry(1,24,12),new THREE.MeshStandardMaterial({color:C("#e4eef8"),roughness:.35,transparent:true,opacity:.92}));crest.visible=false;scene.add(crest);
 let wave=null,waveT=0,shakeT=0,surgeOn=false;
 function swell(d){if(!ac||muted)return;const b=ac.createBuffer(1,ac.sampleRate*d|0,ac.sampleRate),c=b.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=(Math.random()*2-1)*Math.pow(i/c.length,2);
-  const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type="lowpass";f.frequency.value=650;g.gain.value=.16;s.buffer=b;s.connect(f).connect(g).connect(ac.destination);s.start()}
+  const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type="lowpass";f.frequency.value=650;g.gain.value=.16;s.buffer=b;s.connect(f).connect(g).connect(masterG);s.start()}
 function startWave(){
   const has=r=>[0,1,2].some(l=>grid[l][r]&&grid[l][r].state==="idle");
   // waves hit the back of the pile, where the water is in view
@@ -1037,8 +1037,8 @@ const fmt=m=>m>=60?`${Math.floor(m/60)}h${m%60?` ${m%60}m`:""}`:`${m}m`;
 function hud(){$("lvLabel").textContent=`Level ${lvl+1} of ${LEVELS.length}`;$("count").textContent=`${uninstalled}/${TYPES.length}`;$("st").textContent=fmt(screen);$("meter").style.width=Math.min(100,screen/MAXMIN*100)+"%"}
 function toast(t){document.querySelectorAll(".toast").forEach(d=>d.remove());const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1000)}
 let ac;
-function tone(f,d,type="square",v=.06,slide=0){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(slide,ac.currentTime+d);g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+d)}
-function noise(d,v=.18,lp=1800){if(!ac||muted)return;const b=ac.createBuffer(1,ac.sampleRate*d|0,ac.sampleRate),c=b.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=(Math.random()*2-1)*(1-i/c.length);const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type="lowpass";f.frequency.value=lp;g.gain.value=v;s.buffer=b;s.connect(f).connect(g).connect(ac.destination);s.start()}
+function tone(f,d,type="square",v=.06,slide=0){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(slide,ac.currentTime+d);g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(masterG);o.start();o.stop(ac.currentTime+d)}
+function noise(d,v=.18,lp=1800){if(!ac||muted)return;const b=ac.createBuffer(1,ac.sampleRate*d|0,ac.sampleRate),c=b.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=(Math.random()*2-1)*(1-i/c.length);const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type="lowpass";f.frequency.value=lp;g.gain.value=v;s.buffer=b;s.connect(f).connect(g).connect(masterG);s.start()}
 function thud(c,v){if(!c.attract)noise(.09,v*.5,500)}
 
 // ---------- night sky: stars and a moon, faded in by the mood ----------
@@ -1197,7 +1197,12 @@ function lose(){
   $("share").hidden=true;$("next").hidden=true;$("last").hidden=true;$("again").textContent="Try again";againAction=()=>{setupLevel(lvl);beginLevel()};
   setTimeout(()=>{$("endO").hidden=false},900);
 }
-const initAudio=()=>{try{ac=ac||new (window.AudioContext||window.webkitAudioContext)()}catch(e){}};
+let masterG=null;
+const initAudio=()=>{try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(!masterG){masterG=ac.createGain();masterG.gain.value=muted?0:1;masterG.connect(ac.destination)}}catch(e){}};
+const MUTE_FADE=.6; // seconds for a full fade in or out
+function setMute(m){muted=m;try{localStorage.setItem("dta-muted",muted?"1":"0")}catch(e){}muteLabel();
+  if(masterG){const t=ac.currentTime;masterG.gain.cancelScheduledValues(t);masterG.gain.setValueAtTime(masterG.gain.value,t);masterG.gain.linearRampToValueAtTime(m?0:1,t+MUTE_FADE)}
+  if(!m){initAudio();tone(660,.1,"sine",.05)}}
 // returning players pick up where they left off
 function reach(){if(progress.all)return LEVELS.length-1;const st=progress.stars.reduce((m,v,i)=>v>0?Math.max(m,i+1):m,0);return Math.min(LEVELS.length-1,Math.max(progress.unlocked||0,st))}
 function startLabel(){const u=progress.unlocked||0;$("start").textContent="Play";
@@ -1215,7 +1220,7 @@ $("openHow").addEventListener("click",()=>{$("startO").hidden=true;$("howO").hid
 $("howBack").addEventListener("click",()=>{$("howO").hidden=true;$("startO").hidden=false});
 let muted=false;try{muted=localStorage.getItem("dta-muted")==="1"}catch(e){}
 const muteLabel=()=>{$("mute").textContent=muted?"Sound off":"Sound on"};muteLabel();
-$("mute").addEventListener("click",()=>{muted=!muted;try{localStorage.setItem("dta-muted",muted?"1":"0")}catch(e){}muteLabel();if(!muted){initAudio();tone(660,.1,"sine",.05)}});
+$("mute").addEventListener("click",()=>setMute(!muted));
 startLabel();
 if(DESK)$("ruleClose").innerHTML="<span><b>Double-click</b> to fling an app away (it'll come back). <b>Click</b> flips it.</span>";
 $("start").addEventListener("click",()=>goLevel(0));
@@ -1235,7 +1240,8 @@ $("pause").addEventListener("pointerdown",e=>e.stopPropagation());
 $("resume").addEventListener("click",resumeGame);
 $("restart").addEventListener("click",()=>{setupLevel(lvl);beginLevel()});
 $("menu").addEventListener("click",toMenu);$("endMenu").addEventListener("click",toMenu);
-addEventListener("keydown",e=>{if(e.key==="Escape"||e.key==="p"){if(playing())pauseGame();else if(mode==="pause")resumeGame()}});
+addEventListener("keydown",e=>{if(e.key==="Escape"||e.key==="p"){if(playing())pauseGame();else if(mode==="pause")resumeGame()}
+  if(e.key==="m"||e.key==="M")setMute(!muted)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)pauseGame()});
 $("fresh").addEventListener("click",()=>{progress.unlocked=0;save();startLabel();goLevel(0)});
 $("lvGo").addEventListener("click",()=>{initAudio();beginLevel()});
