@@ -714,7 +714,7 @@ const LEVELS=[
   rule:"An app that stops on a glowing cushion sinks and gets stuck. Roll a matching app onto it and the cushion takes both."},
  {name:"REM",cardTitle:"Letting Go",learn:"letting go",time:"4:44 AM",cue:"Deeper still.",fresh:true,env:"sky",deep:true,rem:true,puffy:true,noBanner:true,types:[0,2,3,5,6,13],copies:5,spawn:[1.35,.75],tick:.46,banner:[30,40],
   sky:{top:"#2c2860",hor:"#a07fb8"},light:{sun:.72,col:"#ffd9e6",hemi:.62,glow:.25,stars:.6},lift:1,
-  rule:"The deepest part of the night. Every match dissolves a row of road. Anything that rolls off the edge is gone."}
+  rule:"Every match dissolves a row of road. Anything that rolls off the edge is gone."}
 ];
 const MORNING_LIGHT=LEVELS[0].light,DAWN_LIGHT={sun:.95,col:"#fff1dc",hemi:.75,glow:0,stars:0},DUSK_LIGHT={sun:.4,col:"#c9a0ff",hemi:.4,glow:.3,stars:.2};
 
@@ -724,7 +724,7 @@ let grid;const clearGrid=()=>{grid=[0,1,2].map(()=>Array(NROWS).fill(null))};cle
 const cubes=[],shards=[];
 let mode="attract",started=false,over=true,lvl=0,L=LEVELS[0],TYPES=L.types;
 // closing only sends an app away for a while, so each level gets a small budget; every match earns one back
-const CLOSE_LIMIT=6,CLOSE_CAP=9;
+const CLOSE_LIMIT=6,CLOSE_CAP=9,FIRST_PLAN_HOLD=3.5;
 let closesLeft=CLOSE_LIMIT;
 let queue=[],remaining={},uninstalled=0,closes=0,shoves=0,drops=0,chain=0,lastMatch=-9,dirty=false,freed=false;
 let elapsed=0,screen=0,spawnT=0,tickT=0,bannerT=12,bannerApp=-1,algoT=18,hintT=0,clockT=0,hints={},script=[],againAction=null;
@@ -882,7 +882,7 @@ function stepCube(c,dt,t){
 }
 function tick(){
   if(playing())cubes.forEach(c=>{if(c.kind!=="plan"||c.row==null||!["idle","move","bump"].includes(c.state))return;
-    if(c.state==="idle"&&c.row===0){happen(c);return}if(--c.planLeft<=0)cancelPlan(c);else drawRing(c)});
+    if(c.state==="idle"&&c.row===0){if(c.firstPlan&&holdFirstPlan(c))return;happen(c);return}if(--c.planLeft<=0)cancelPlan(c);else drawRing(c)});
   if(playing())cubes.forEach(c=>{if(c.upd>0&&c.row!=null&&["idle","move","bump"].includes(c.state)){c.upd--;if(c.upd>0)drawPie(c);else finishUpdate(c)}});
   for(let l=0;l<3;l++)for(let r=0;r<NROWS;r++){const c=grid[l][r];if(!c||c.state!=="idle")continue;
     if(L.rem&&edge>0&&r<=edge&&playing()){fallOff(c);continue}
@@ -930,11 +930,13 @@ function algoStep(c){
   if(remaining[old]<=0)typeDone(old);
   return true;
 }
+// true while the first plan should keep waiting at the front
+function holdFirstPlan(c){if(!c.holdUntil){c.holdUntil=elapsed+FIRST_PLAN_HOLD;showCallout(c,"At the front, your plan happens.",FIRST_PLAN_HOLD)}return elapsed<c.holdUntil}
 function happen(c){freeCell(c);if(c.ring){scene.remove(c.ring);c.ring=null}c.state="float";c.t=0;dirty=true;
   confetti(c.mesh.position,22,["#ffd166","#ff9f6b","#ffffff","#a8e6cf","#f7aef8"]);[523,659,784,1047,1319].forEach((f,i)=>setTimeout(()=>tone(f,.25,"sine",.05),i*70));
-  if(!playing())return;screen=Math.max(0,screen-15);toast(`${PLANS[c.pi][0]} happened · 15m back`);hud()}
+  if(!playing())return;screen=Math.max(0,screen-15);toast(`${PLANS[c.pi][0]} happened · 15m back`,2.8);hud()}
 function cancelPlan(c){freeCell(c);if(c.ring){scene.remove(c.ring);c.ring=null}c.state="deflate";c.t=0;dirty=true;tone(300,.4,"sine",.05,120);
-  if(!playing())return;screen+=10;toast(`${PLANS[c.pi][0]} cancelled +10m`);hud();if(screen>=MAXMIN)lose()}
+  if(!playing())return;screen+=10;toast(`${PLANS[c.pi][0]} cancelled +10m`,2.8);hud();if(screen>=MAXMIN)lose()}
 function install(c){
   freeCell(c);c.state="install";c.t=0;c.p0=c.mesh.position.clone();if(c.tag){scene.remove(c.tag);c.tag=null}
   if(!playing())return;
@@ -1126,8 +1128,8 @@ function hintCheck(){
   if(!progress.seenDrop&&!hints.drop&&elapsed>(lvl===0?24:8)){const d=idle.find(c=>c.row>=3&&!grid[c.lane][c.row-1]);if(d){hints.drop=1;showCallout(d,"Swipe down to drop ↓",3);return}}
   if(L.orient&&!hints.flip){const u=idle.find(c=>c.flip===1);if(u){hints.flip=1;showCallout(u,DESK?"Upside down. Click to flip it":"Upside down. Swipe up to flip ↑",3.4);return}}
   if(L.orient&&!hints.dbl&&elapsed>22)for(const c of idle){if(c.flip!==1)continue;if(neighbors(c).some(y=>y.state==="idle"&&y.type===c.type&&y.flip===1)){hints.dbl=1;showCallout(c,"Three upside down count double",3.2);return}}
-  if(L.plans&&!hints.plan){const p=idle.find(c=>c.kind==="plan");if(p){hints.plan=1;showCallout(p,"A plan. Swipe down, let it happen ↓",3.4);return}}
-  if(L.plans&&!hints.plan2&&elapsed>10){const p=idle.find(c=>c.kind==="plan"&&c.row>0&&grid[c.lane][c.row-1]);if(p){hints.plan2=1;showCallout(p,"Clear the way, or it gets cancelled",3.2);return}}
+  if(L.plans&&!hints.plan){const p=idle.find(c=>c.kind==="plan");if(p){hints.plan=1;showCallout(p,"A plan. Swipe down, let it happen ↓",4.5);return}}
+  if(L.plans&&!hints.plan2&&elapsed>10){const p=idle.find(c=>c.kind==="plan"&&c.row>0&&grid[c.lane][c.row-1]);if(p){hints.plan2=1;showCallout(p,"Clear the way, or it gets cancelled",4.5);return}}
   if(L.boxes&&!hints.box){const b=idle.find(c=>c.kind==="box");if(b){hints.box=1;showCallout(b,"Your order arrived. Match next to it.",3.6);return}}
   if(L.sea&&!hints.sea){const c=idle.find(c=>c.lane!==1);if(c){hints.sea=1;showCallout(c,c.lane===0?"← Swipe it into the sea":"Swipe it into the sea →",3.6);return}}
   if(L.soft&&!hints.pairHint&&elapsed>16){const s=idle.find(c=>c.sunk&&!c.stackedBy);if(s){hints.pairHint=1;showCallout(s,`Needs another ${APPS[s.type][0]}`,3);return}}
@@ -1216,7 +1218,9 @@ function setupLevel(i){
     {at:.9,fn:()=>{takeFromQueue(x=>x===A);spawn(A,0)}},{at:1.3,fn:()=>{takeFromQueue(x=>x===A);spawn(A,2)}})}
   if(L.sea)script.push({at:.2,fn:()=>{spawn(takeFromQueue(x=>x>=0),0)}});
   if(L.orient){let A;script.push({at:.2,fn:()=>{A=takeFromQueue(x=>x>=0);takeFromQueue(x=>x===A);spawn(A,0,{flip:0});spawn(A,2,{flip:0})}},{at:1.1,fn:()=>{takeFromQueue(x=>x===A);spawn(A,1,{flip:1})}})}
-  if(L.plans)script.push({at:.2,fn:()=>{takeFromQueue(x=>x===PLAN);spawn(PLAN,1,{pi:0})}});
+  // the first plan waits at the front long enough to read what it is, then happens
+  if(L.plans)script.push({at:.2,fn:()=>{takeFromQueue(x=>x===PLAN);const p=spawn(PLAN,1,{pi:0});
+    if(p){p.firstPlan=true;hints.plan=1;showCallout(p,"A plan, not an app. Let it reach the front.",12)}}});
   if(L.boxes){let A;script.push({at:.2,fn:()=>{takeFromQueue(x=>x===BOX);spawn(BOX,1,{row:0})}},{at:1.2,fn:()=>{A=takeFromQueue(x=>x>=0);spawn(A,0,{row:0})}},
     {at:1.9,fn:()=>{takeFromQueue(x=>x===A);spawn(A,0,{row:1})}},{at:2.8,fn:()=>{takeFromQueue(x=>x===A);spawn(A,0,{row:2})}})}
   if(L.soft){let A;script.push({at:.2,fn:()=>{A=takeFromQueue(x=>x>=0);spawn(A,1)}},{at:3.4,fn:()=>{if(takeFromQueue(x=>x===A)!=null)spawn(A,1)}})}
@@ -1244,7 +1248,7 @@ const PREVIEW={
   "REM":{tiles:[{alpha:.45},{alpha:.45},{alpha:.45}],end:"dissolve"}
 };
 // crop the empty rows above and below the drawing so the card spacing is set by CSS, not by canvas padding
-const PREVIEW_H=220;
+const PREVIEW_H=220,END_GAP=130,END_W=END_GAP+70; // tile edge to end-picture centre; plus its right half
 function trimPreview(pc){
   const g=pc.getContext("2d"),W=pc.width,H=pc.height,d=g.getImageData(0,0,W,H).data;
   const inked=y=>{for(let x=0;x<W;x++)if(d[(y*W+x)*4+3]>8)return true;return false};
@@ -1254,7 +1258,8 @@ function trimPreview(pc){
 }
 function drawLevelPreview(l){
   const pc=$("lvPrev"),g=pc.getContext("2d"),W=pc.width,H=pc.height,a=APPS[l.types[0]];
-  const P=PREVIEW[l.name]||{tiles:[{}],end:"burst"},TS=120,GAP=18,ROW=(H-TS)/2,n=P.tiles.length,x0=P.at??20;
+  const P=PREVIEW[l.name]||{tiles:[{}],end:"burst"},TS=120,GAP=18,ROW=(H-TS)/2,n=P.tiles.length,tilesW=n*TS+(n-1)*GAP,
+    x0=P.at??(P.end==="sea"?20:P.end==="sink"?(W-TS)/2:Math.max(2,(W-tilesW-END_W)/2));
   const faceOf=t=>t.f==="grey"?greyFace(a,TS):t.f==="plan"?planFace(0,TS):t.f==="box"?boxFace(0,TS):faceCanvas(a,TS);
   const badge=(x,y,label,col="#ff3b30")=>{g.fillStyle="#fff";g.beginPath();g.arc(x,y,26,0,7);g.fill();g.fillStyle=col;g.beginPath();g.arc(x,y,21,0,7);g.fill();
     g.fillStyle="#fff";g.font='700 28px "Instrument Sans", system-ui, sans-serif';g.textAlign="center";g.textBaseline="middle";g.fillText(label,x,y+2)};
@@ -1275,7 +1280,7 @@ function drawLevelPreview(l){
     g.fillStyle="#fff";g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,33,-Math.PI/2,-Math.PI/2+Math.PI*1.25);g.closePath();g.fill()};
   g.clearRect(0,0,W,H);
   if(P.end==="copy"){drawCopyPreview(g,l,TS,ROW,badge,arrow,sparkle);return}
-  const endX=W-70,endY=H/2,lastX=x0+(n-1)*(TS+GAP)+TS;
+  const lastX=x0+tilesW,endX=lastX+END_GAP,endY=H/2;
   if(P.end==="sink"){g.fillStyle="#b59cff";g.shadowColor="#b59cff";g.shadowBlur=30;g.beginPath();g.ellipse(x0+TS/2,ROW+TS+8,TS*.8,22,0,0,7);g.fill();g.shadowBlur=0}
   P.tiles.forEach((t,i)=>{const x=x0+i*(TS+GAP),y=ROW;
     g.save();g.globalAlpha=t.alpha??1;g.translate(x+TS/2,y+TS/2);if(t.flip)g.rotate(Math.PI);g.translate(-TS/2,-TS/2);
@@ -1293,7 +1298,7 @@ function drawLevelPreview(l){
 }
 // Feed card: the recommended app (purple glow, ✦ tag, as in play) turns the app beside it into a copy of itself
 function drawCopyPreview(g,l,TS,y,badge,arrow,sparkle){
-  const a=APPS[l.types[0]],b=APPS[l.types.find(t=>t!==l.types[0])??l.types[0]],xA=40,xB=xA+TS+44,xC=xB+TS+84;
+  const a=APPS[l.types[0]],b=APPS[l.types.find(t=>t!==l.types[0])??l.types[0]],xA=64,xB=xA+TS+44,xC=xB+TS+84;
   const tile=(x,face,glow)=>{g.save();g.translate(x,y);if(glow){g.shadowColor=glow;g.shadowBlur=34}
     rrPath(g,0,0,TS,TS,30);g.fillStyle="#fff";g.fill();g.shadowBlur=0;g.lineWidth=6;g.strokeStyle="#2b2440";g.stroke();g.clip();g.drawImage(face,0,0,TS,TS);g.restore()};
   tile(xA,faceCanvas(a,TS),"#c084fc");tile(xB,faceCanvas(b,TS));tile(xC,faceCanvas(a,TS),"#c084fc");
