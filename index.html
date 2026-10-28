@@ -3,6 +3,8 @@
 </head><body>
 <meta charset="utf-8">
 <title>Delete the Apps</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Lilita+One&family=Instrument+Sans:wght@400;600;700&display=swap">
 <style>
@@ -53,6 +55,8 @@ button{font:inherit;border:0;cursor:pointer}
 .tide.on{opacity:1;transition:opacity 1.4s ease-in}
 .go.sink{animation:sink .65s ease-in forwards}
 @keyframes sink{30%{transform:translateY(-14px) rotate(-6deg)}100%{transform:translateY(260px) rotate(28deg);opacity:0}}
+.pill .closes{display:block;margin-top:3px;font-size:10px;opacity:.85}.pill .closes.out{color:#ff8a7a;opacity:1}.pill .closes.bump{animation:closesBump .4s}
+@keyframes closesBump{30%{transform:translateX(-4px)}60%{transform:translateX(4px)}}
 .pill{white-space:nowrap}.pill b small{font:700 10px var(--body);letter-spacing:.08em;opacity:.8}
 .pbtn{pointer-events:auto;flex:none;width:42px;height:42px;margin-top:4px;border-radius:50%;background:var(--shade);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:grid;place-items:center;padding:0}
 .pbtn:focus-visible{outline:3px solid #fff;outline-offset:2px}
@@ -142,11 +146,11 @@ button{font:inherit;border:0;cursor:pointer}
 #lvPrev{width:100%;max-width:340px;height:auto;aspect-ratio:600/220;margin:0}
 .lvcard{border:6px solid transparent;background:linear-gradient(180deg,color-mix(in srgb,var(--tint,#ffd23f) 38%,#fff),#fffaf0) padding-box,linear-gradient(90deg,#ff6a3d,#ffd23f,#34d399,#60a5fa,#c084fc,#f472b6) border-box;box-shadow:0 8px 0 #2b2440,0 24px 50px rgba(20,16,40,.45)}
 .lvcard{width:min(100%,380px);padding:22px 20px 20px;gap:10px;justify-content:center}
-.lvcard h2{font-size:40px;line-height:1;color:#111;margin:4px 0}
+.lvcard h2{font-size:40px;line-height:1;color:#111;margin:4px 0 0}
 .lvtop{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
 .lvpill{margin:0!important;padding:7px 16px;border-radius:999px;border:3px solid #2b2440;box-shadow:0 3px 0 #2b2440;background:linear-gradient(180deg,#ffe066,#ffb020);font:700 12px var(--body)!important;letter-spacing:.14em;text-transform:uppercase;color:#2b2440!important;opacity:1!important}
 .lvpill.clock{font-family:var(--display)!important;font-size:13px!important;color:#fff!important;text-shadow:0 2px 0 #2b2440;background:linear-gradient(90deg,#34d399,#60a5fa,#c084fc,#f472b6,#fbbf24)}
-.lvrule{font-size:15px;font-weight:700;max-width:30ch;color:#2b2440}
+.lvrule{font-size:20px;line-height:1.25;font-weight:700;max-width:100%;color:#2b2440;text-wrap:balance}
 .lvstat{font-size:14px;font-weight:700;max-width:30ch;color:#2b2440;margin:0!important}
 .lvstat .stars{font-size:22px;line-height:1;display:block}
 .lvcard #lvGo{font-size:24px;padding:16px 48px;background:linear-gradient(180deg,#ff8a4c,#ff4d2e);box-shadow:0 6px 0 #b8330f,0 0 0 3px #2b2440;color:#fff;text-shadow:0 2px 0 #b8330f}
@@ -168,7 +172,7 @@ button{font:inherit;border:0;cursor:pointer}
 <div class="tide" id="tide"></div>
 <div class="veil" id="veil"></div>
 <div class="hud" id="hud" hidden>
-  <div class="pill"><span id="lvLabel">Level 1 of 10</span><b><span id="count">0/5</span> <small>deleted</small></b></div>
+  <div class="pill"><span id="lvLabel">Level 1 of 10</span><b><span id="count">0/5</span> <small>deleted</small></b><span class="closes" id="closesLeft">6 closes left</span></div>
   <button class="pbtn" id="pause" type="button" aria-label="Pause"><svg width="14" height="16" viewBox="0 0 14 16" aria-hidden="true"><rect x="1" y="1" width="4" height="14" rx="1.5" fill="#fff"/><rect x="9" y="1" width="4" height="14" rx="1.5" fill="#fff"/></svg></button>
   <div class="pill" style="text-align:right">Screen time<b id="st">0m</b><div class="meter"><i id="meter"></i></div></div>
 </div>
@@ -283,7 +287,7 @@ button{font:inherit;border:0;cursor:pointer}
   <p>Apps roll toward you. Let them come down, then match 3 of the same app to delete it.</p>
   <ul class="rules">
     <li><span><b>Match 3</b> of the same app to delete it for good.</span></li>
-    <li id="ruleClose"><span><b>Tap</b> or flick up to send an app away. It comes back later.</span></li>
+    <li id="ruleClose"><span><b>Tap</b> or flick up to send an app away. It comes back later, and you only get a few closes. Each match earns one back.</span></li>
     <li><span><b>Swipe sideways</b> to switch lanes. <b>Swipe down</b> to bring an app to you.</span></li>
     <li><span>If a lane fills up, an app installs and adds screen time.</span></li>
   </ul>
@@ -719,6 +723,9 @@ const rowZ=r=>ROW0Z-r*PITCH;
 let grid;const clearGrid=()=>{grid=[0,1,2].map(()=>Array(NROWS).fill(null))};clearGrid();
 const cubes=[],shards=[];
 let mode="attract",started=false,over=true,lvl=0,L=LEVELS[0],TYPES=L.types;
+// closing only sends an app away for a while, so each level gets a small budget; every match earns one back
+const CLOSE_LIMIT=6,CLOSE_CAP=9;
+let closesLeft=CLOSE_LIMIT;
 let queue=[],remaining={},uninstalled=0,closes=0,shoves=0,drops=0,chain=0,lastMatch=-9,dirty=false,freed=false;
 let elapsed=0,screen=0,spawnT=0,tickT=0,bannerT=12,bannerApp=-1,algoT=18,hintT=0,clockT=0,hints={},script=[],againAction=null;
 let progress={unlocked:0,stars:[0,0,0,0]};
@@ -950,7 +957,7 @@ function doMatch(grp){
   const type=grp[0].type,a=APPS[type],n=grp.length,hadAlgo=grp.some(c=>c.algo);
   grp.forEach(c=>{c.state="match";c.t=0});
   if(!playing())return;
-  remaining[type]-=n;
+  remaining[type]-=n;closesLeft=Math.min(CLOSE_CAP,closesLeft+1);
   screen=Math.max(0,screen-Math.round(a[3]*n/3*chain));
   const boxes=new Set();grp.forEach(c=>neighbors(c).forEach(y=>{if(y.kind==="box"&&["idle","bump"].includes(y.state))boxes.add(y)}));
   let dbl=0;if(L.orient&&grp[0].flip===1){dbl=removeCopies(type,n,grp);remaining[type]-=dbl;screen=Math.max(0,screen-Math.round(a[3]*dbl/3))}
@@ -985,10 +992,11 @@ function close(c,flick){
   if(c.sunk){tone(150,.15,"sine",.05);showCallout(c,`Stuck. Roll another ${APPS[c.type][0]} onto it`,1.8);return}
   if(c.badge>0){setBadge(c,c.badge-1);c.squash=1;tone(700+c.badge*120,.08,"sine",.06);
     showCallout(c,c.badge>0?`${c.badge} more`:"Now it closes",1.4);return}
+  if(closesLeft<=0){c.squash=1;tone(140,.12,"square",.05);showCallout(c,"No closes left. Match it.",2.4);bumpCloses();return}
   const midair=c.state==="air"&&c.y>G+S/2+1.5;
   freeCell(c);if(c.tag){scene.remove(c.tag);c.tag=null}c.state="close";c.t=0;c.vy=flick?14:10;c.far=flick&&DESK;
-  noise(.16,.12,2600);tone(380,.16,"sine",.06,900);closes++;
-  if(closes===1)toast("Closed. It'll be back.");else if(closes===7)toast("Closing isn't deleting");else if(midair)toast("MIDAIR");
+  noise(.16,.12,2600);tone(380,.16,"sine",.06,900);closes++;closesLeft--;hud();
+  if(closesLeft===0)toast("No closes left",2.6);else if(closes===1)toast("Closed. It'll be back.",2.2);else if(closes===3)toast("Closing isn't deleting",3.2);else if(midair)toast("MIDAIR");
 }
 // hard drop: swipe down sends an app straight to the front of its lane
 function drop(c){
@@ -1150,8 +1158,9 @@ $("banner").addEventListener("pointerdown",e=>{e.stopPropagation();if(bannerApp<
 
 // ---------- HUD / toasts / sound ----------
 const fmt=m=>m>=60?`${Math.floor(m/60)}h${m%60?` ${m%60}m`:""}`:`${m}m`;
-function hud(){$("lvLabel").textContent=`Level ${lvl+1} of ${LEVELS.length}`;$("count").textContent=`${uninstalled}/${TYPES.length}`;$("st").textContent=fmt(screen);$("meter").style.width=Math.min(100,screen/MAXMIN*100)+"%"}
-function toast(t){document.querySelectorAll(".toast").forEach(d=>d.remove());const d=document.createElement("div");d.className="toast";d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),1000)}
+function hud(){$("lvLabel").textContent=`Level ${lvl+1} of ${LEVELS.length}`;$("count").textContent=`${uninstalled}/${TYPES.length}`;$("closesLeft").textContent=`${closesLeft} ${closesLeft===1?"close":"closes"} left`;$("closesLeft").classList.toggle("out",closesLeft===0);$("st").textContent=fmt(screen);$("meter").style.width=Math.min(100,screen/MAXMIN*100)+"%"}
+function toast(t,dur=1){document.querySelectorAll(".toast").forEach(d=>d.remove());const d=document.createElement("div");d.className="toast";d.textContent=t;d.style.animationDuration=dur+"s";document.body.appendChild(d);setTimeout(()=>d.remove(),dur*1000)}
+function bumpCloses(){const el=$("closesLeft");el.classList.remove("bump");void el.offsetWidth;el.classList.add("bump")}
 let ac;
 function tone(f,d,type="square",v=.06,slide=0){if(!ac||muted)return;const o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.value=f;if(slide)o.frequency.exponentialRampToValueAtTime(slide,ac.currentTime+d);g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+d);o.connect(g).connect(masterG);o.start();o.stop(ac.currentTime+d)}
 function noise(d,v=.18,lp=1800){if(!ac||muted)return;const b=ac.createBuffer(1,ac.sampleRate*d|0,ac.sampleRate),c=b.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=(Math.random()*2-1)*(1-i/c.length);const s=ac.createBufferSource(),f=ac.createBiquadFilter(),g=ac.createGain();f.type="lowpass";f.frequency.value=lp;g.gain.value=v;s.buffer=b;s.connect(f).connect(g).connect(masterG);s.start()}
@@ -1196,7 +1205,7 @@ function setupLevel(i){
   $("veil").className="veil"+(L.dream?" on":L.deep?" on deep":"");appMats=L.puffy?puffMats:baseMats;curGeo=L.orient?orientG:L.puffy?puffG:cubeG;appMats.forEach(m=>m.emissiveIntensity=mood.light.glow);
   wave=null;crest.visible=false;waveT=L.waves?9:0;
   queue=shuffle(TYPES.flatMap(t=>Array(L.copies).fill(t)).concat(Array(L.plans||0).fill(PLAN),Array(L.boxes||0).fill(BOX)));remaining={};TYPES.forEach(t=>remaining[t]=L.copies);
-  uninstalled=0;elapsed=0;screen=0;chain=0;tickT=0;algoT=L.algoStart||20;hintT=1;freed=false;hints={};
+  uninstalled=0;closes=0;closesLeft=CLOSE_LIMIT;elapsed=0;screen=0;chain=0;tickT=0;algoT=L.algoStart||20;hintT=1;freed=false;hints={};
   spawnT=i===0?.3:L.sea?1.6:L.soft?7:4.5;bannerT=rnd(...L.banner)+5;
   balloons.concat([hot]).forEach(b=>{b.position.y=b.userData.y});
   setMood(L.sky,L.light,1.8);buildDock();$("dock").classList.toggle("many",TYPES.length>6);hud();
@@ -1218,14 +1227,14 @@ function showIntro(i){
   setupLevel(i);setMode("intro");$("hud").hidden=true;$("dock").hidden=true;$("endO").hidden=true;$("lvStat").hidden=true;
   const l=LEVELS[i];$("lvTime").hidden=true;$("lvAct").textContent=`Level ${i+1} of ${LEVELS.length}`;$("lvName").textContent=l.cardTitle;$("lvRule").textContent=l.rule;
   $("levelO").querySelector(".lvcard").style.setProperty("--tint",l.sky.hor);
-  drawLevelPreview(l);
+  $("lvPrev").height=PREVIEW_H;drawLevelPreview(l);trimPreview($("lvPrev"));
   $("levelO").hidden=false;tone(392,.3,"sine",.05,523);
 }
 // ---------- level card picture: the rule in one drawing ----------
 const PREVIEW={
   "Morning":{tiles:[{},{},{}],end:"burst"},
   "Afternoon":{tiles:[{badge:"3"},{},{}],end:"burst"},
-  "2 A.M.":{tiles:[{},{glow:"#c084fc"},{}],end:"burst"},
+  "2 A.M.":{tiles:[],end:"copy"},
   "Can't Sleep":{tiles:[{f:"grey"},{f:"grey"},{f:"grey"}],end:"ring"},
   "Sleeping In":{tiles:[{flip:1},{},{}],end:"burst"},
   "Plans":{tiles:[{f:"plan"}],end:"ring"},
@@ -1234,11 +1243,20 @@ const PREVIEW={
   "Sinking":{tiles:[{}],end:"sink"},
   "REM":{tiles:[{alpha:.45},{alpha:.45},{alpha:.45}],end:"dissolve"}
 };
+// crop the empty rows above and below the drawing so the card spacing is set by CSS, not by canvas padding
+const PREVIEW_H=220;
+function trimPreview(pc){
+  const g=pc.getContext("2d"),W=pc.width,H=pc.height,d=g.getImageData(0,0,W,H).data;
+  const inked=y=>{for(let x=0;x<W;x++)if(d[(y*W+x)*4+3]>8)return true;return false};
+  let t=0,b=H-1;while(t<b&&!inked(t))t++;while(b>t&&!inked(b))b--;
+  const img=g.getImageData(0,t,W,b-t+1);pc.height=b-t+1;g.putImageData(img,0,0);
+  pc.style.aspectRatio=`${W}/${pc.height}`;
+}
 function drawLevelPreview(l){
   const pc=$("lvPrev"),g=pc.getContext("2d"),W=pc.width,H=pc.height,a=APPS[l.types[0]];
   const P=PREVIEW[l.name]||{tiles:[{}],end:"burst"},TS=120,GAP=18,ROW=(H-TS)/2,n=P.tiles.length,x0=P.at??20;
   const faceOf=t=>t.f==="grey"?greyFace(a,TS):t.f==="plan"?planFace(0,TS):t.f==="box"?boxFace(0,TS):faceCanvas(a,TS);
-  const badge=(x,y,label)=>{g.fillStyle="#fff";g.beginPath();g.arc(x,y,26,0,7);g.fill();g.fillStyle="#ff3b30";g.beginPath();g.arc(x,y,21,0,7);g.fill();
+  const badge=(x,y,label,col="#ff3b30")=>{g.fillStyle="#fff";g.beginPath();g.arc(x,y,26,0,7);g.fill();g.fillStyle=col;g.beginPath();g.arc(x,y,21,0,7);g.fill();
     g.fillStyle="#fff";g.font='700 28px "Instrument Sans", system-ui, sans-serif';g.textAlign="center";g.textBaseline="middle";g.fillText(label,x,y+2)};
   const arrow=(x1,y1,x2,y2)=>{const gr=g.createLinearGradient(x1,y1,x2,y2);gr.addColorStop(0,"#ffd23f");gr.addColorStop(1,"#ffffff");
     g.strokeStyle=gr;g.lineWidth=9;g.lineCap="round";g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
@@ -1256,6 +1274,7 @@ function drawLevelPreview(l){
   const ring=(cx,cy)=>{g.fillStyle="rgba(16,16,30,.55)";g.beginPath();g.arc(cx,cy,52,0,7);g.fill();g.strokeStyle="#fff";g.lineWidth=6;g.beginPath();g.arc(cx,cy,40,0,7);g.stroke();
     g.fillStyle="#fff";g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,33,-Math.PI/2,-Math.PI/2+Math.PI*1.25);g.closePath();g.fill()};
   g.clearRect(0,0,W,H);
+  if(P.end==="copy"){drawCopyPreview(g,l,TS,ROW,badge,arrow,sparkle);return}
   const endX=W-70,endY=H/2,lastX=x0+(n-1)*(TS+GAP)+TS;
   if(P.end==="sink"){g.fillStyle="#b59cff";g.shadowColor="#b59cff";g.shadowBlur=30;g.beginPath();g.ellipse(x0+TS/2,ROW+TS+8,TS*.8,22,0,0,7);g.fill();g.shadowBlur=0}
   P.tiles.forEach((t,i)=>{const x=x0+i*(TS+GAP),y=ROW;
@@ -1271,6 +1290,21 @@ function drawLevelPreview(l){
     if(P.end==="ring")ring(endX,endY);
     else{puff(endX,endY,62);trash(endX,endY+4,74)}
     sparkle(endX+58,endY-52,11,"#f472b6");sparkle(endX-60,endY+50,9,"#34d399");sparkle(endX+62,endY+46,8,"#60a5fa")}
+}
+// Feed card: the recommended app (purple glow, ✦ tag, as in play) turns the app beside it into a copy of itself
+function drawCopyPreview(g,l,TS,y,badge,arrow,sparkle){
+  const a=APPS[l.types[0]],b=APPS[l.types.find(t=>t!==l.types[0])??l.types[0]],xA=40,xB=xA+TS+44,xC=xB+TS+84;
+  const tile=(x,face,glow)=>{g.save();g.translate(x,y);if(glow){g.shadowColor=glow;g.shadowBlur=34}
+    rrPath(g,0,0,TS,TS,30);g.fillStyle="#fff";g.fill();g.shadowBlur=0;g.lineWidth=6;g.strokeStyle="#2b2440";g.stroke();g.clip();g.drawImage(face,0,0,TS,TS);g.restore()};
+  tile(xA,faceCanvas(a,TS),"#c084fc");tile(xB,faceCanvas(b,TS));tile(xC,faceCanvas(a,TS),"#c084fc");
+  badge(xA+TS-14,y+14,"✦","#9b5cff");
+  const x1=xA+TS*.55,x2=xB+TS*.45,top=y-6,cx=(x1+x2)/2,cy=y-62;
+  g.strokeStyle="#2b2440";g.lineWidth=15;g.lineCap="round";g.beginPath();g.moveTo(x1,top);g.quadraticCurveTo(cx,cy,x2,top);g.stroke();
+  g.strokeStyle="#c084fc";g.lineWidth=8;g.beginPath();g.moveTo(x1,top);g.quadraticCurveTo(cx,cy,x2,top);g.stroke();
+  const t=Math.atan2(top-cy,x2-cx);g.fillStyle="#c084fc";g.strokeStyle="#2b2440";g.lineWidth=4;g.lineJoin="round";g.beginPath();
+  g.moveTo(x2+6*Math.cos(t),top+6*Math.sin(t));g.lineTo(x2-22*Math.cos(t-.5),top-22*Math.sin(t-.5));g.lineTo(x2-22*Math.cos(t+.5),top-22*Math.sin(t+.5));g.closePath();g.fill();g.stroke();
+  arrow(xB+TS+14,y+TS/2,xC-16,y+TS/2);
+  sparkle(xC+TS+6,y+4,13,"#c084fc");sparkle(xC-4,y+TS-2,10,"#e9d5ff");sparkle(xB+TS*.5,y-34,9,"#ffffff");
 }
 function rrPath(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
 function beginLevel(){$("pauseO").hidden=true;$("levelO").hidden=true;$("endO").hidden=true;$("startO").hidden=true;$("hud").hidden=false;$("dock").hidden=false;setMode("play");hud();tone(440,.12,"sine",.07,880)}
@@ -1338,7 +1372,7 @@ let muted=false;try{muted=localStorage.getItem("dta-muted")==="1"}catch(e){}
 const muteLabel=()=>{$("muteLbl").textContent=muted?"Sound off":"Sound";$("mute").classList.toggle("off",muted);$("mute").setAttribute("aria-pressed",String(!muted))};muteLabel();
 $("mute").addEventListener("click",()=>setMute(!muted));
 startLabel();
-if(DESK)$("ruleClose").innerHTML="<span><b>Double-click</b> to fling an app away (it'll come back). <b>Click</b> flips it.</span>";
+if(DESK)$("ruleClose").innerHTML="<span><b>Double-click</b> to fling an app away. It comes back, and you only get a few. Each match earns one back. <b>Click</b> flips it.</span>";
 $("start").addEventListener("click",()=>goLevel(0));
 function goLevel(i){initAudio();["startO","pauseO","endO","levelO","mapO","howO"].forEach(id=>$(id).hidden=true);$("hud").hidden=true;$("dock").hidden=true;hideCallout();hideBanner();
   showIntro(i)}
