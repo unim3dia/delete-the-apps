@@ -105,7 +105,14 @@ button{font:inherit;border:0;cursor:pointer}
 .callout::after{content:"";position:absolute;left:50%;bottom:-5px;width:11px;height:11px;background:inherit;transform:translateX(-50%) rotate(45deg);border-radius:2px}
 @keyframes bob{50%{margin-top:-4px}}
 .clock{font-family:var(--display);font-size:13px!important;letter-spacing:.16em;color:var(--hot);text-transform:uppercase}
-#lvPrev{width:112px;height:112px;margin:2px 0}
+#lvPrev{width:100%;max-width:340px;height:auto;aspect-ratio:2/1;margin:4px 0}
+.lvcard{width:min(100%,380px);padding:20px 20px 18px;gap:10px}
+.lvcard h2{font-size:44px}
+.lvtop{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.lvpill{margin:0!important;padding:6px 14px;border-radius:999px;background:rgba(43,36,64,.09);font:700 11px var(--body)!important;letter-spacing:.14em;text-transform:uppercase;color:var(--cardink)!important;opacity:1!important}
+.lvpill.clock{font-family:var(--display)!important;font-size:12px!important;color:#fff!important;background:var(--hot)}
+.lvrule{font-size:15px;font-weight:600;max-width:30ch}
+.lvcard .ghost{text-decoration:none;opacity:1;padding:9px 20px;border-radius:999px;background:rgba(43,36,64,.1);font-family:var(--display);text-transform:uppercase;font-size:13px;letter-spacing:.04em;color:var(--cardink)}
 .stars{font-size:32px;letter-spacing:.12em;color:#f2a91f}
 .go.alt{background:#2b2440;box-shadow:0 5px 0 #120f1c}
 .ghost{background:transparent;color:inherit;text-decoration:underline;font-size:13px;opacity:.7;padding:6px}
@@ -162,12 +169,11 @@ button{font:inherit;border:0;cursor:pointer}
   <button class="go" id="howBack">Got it</button>
 </div></div>
 
-<div class="overlay" id="levelO" hidden><div class="card">
-  <p class="act" id="lvAct" hidden></p>
-  <p class="clock" id="lvTime"></p>
+<div class="overlay" id="levelO" hidden><div class="card lvcard">
+  <div class="lvtop"><p class="lvpill" id="lvAct"></p><p class="lvpill clock" id="lvTime"></p></div>
   <h2 id="lvName"></h2>
-  <canvas id="lvPrev" width="224" height="224" aria-hidden="true"></canvas>
-  <p id="lvRule"></p>
+  <canvas id="lvPrev" width="600" height="300" aria-hidden="true"></canvas>
+  <p class="lvrule" id="lvRule"></p>
   <button class="go" id="lvGo">Start</button>
   <button class="ghost" id="lvMenu">Main menu</button>
 </div></div>
@@ -1092,22 +1098,47 @@ function setupLevel(i){
 }
 function showIntro(i){
   setupLevel(i);setMode("intro");$("hud").hidden=true;$("dock").hidden=true;$("endO").hidden=true;
-  const l=LEVELS[i];$("lvTime").textContent=l.time;$("lvAct").hidden=!l.chapter;$("lvAct").textContent=l.chapter?`${ACTS[l.chapter].n} · ${l.chapter}`:"";$("lvName").textContent=l.name;$("lvRule").textContent=l.rule;
-  const pc=$("lvPrev"),g=pc.getContext("2d"),n=pc.width,a=APPS[l.types[0]];g.clearRect(0,0,n,n);
-  const showAlgo=l.algo&&!l.updates;
-  if(showAlgo){g.save();g.shadowColor="#c084fc";g.shadowBlur=48;g.fillStyle="#c084fc";rrPath(g,34,34,n-68,n-68,30);g.fill();g.restore()}
-  g.save();rrPath(g,34,34,n-68,n-68,30);g.clip();if(l.orient){g.translate(n/2,n/2);g.rotate(Math.PI);g.translate(-n/2,-n/2)}
-  if(l.rem)g.globalAlpha=.45;
-  g.drawImage(l.updates?greyFace(a,n-68):l.plans?planFace(0,n-68):l.boxes?boxFace(0,n-68):faceCanvas(a,n-68),34,34);
-  if(l.soft){g.globalAlpha=1;g.fillStyle="#d6c8ff";g.beginPath();g.ellipse(n/2,n-30,n*.62,n*.22,0,0,7);g.fill()}g.restore();
-  if(l.updates){const cx=n/2,cy=n/2;g.fillStyle="rgba(16,16,30,.55)";g.beginPath();g.arc(cx,cy,52,0,7);g.fill();g.strokeStyle="#fff";g.lineWidth=6;g.beginPath();g.arc(cx,cy,40,0,7);g.stroke();
-    g.fillStyle="#fff";g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,33,-Math.PI/2,-Math.PI/2+Math.PI*1.25);g.closePath();g.fill()}
-  const tag=(label,bg)=>{g.fillStyle="#fff";g.beginPath();g.arc(n-40,40,34,0,7);g.fill();g.fillStyle=bg;g.beginPath();g.arc(n-40,40,29,0,7);g.fill();
-    g.fillStyle="#fff";g.font='700 36px "Instrument Sans", system-ui, sans-serif';g.textAlign="center";g.textBaseline="middle";g.fillText(label,n-40,42)};
-  if(l.sea)for(const[yy,col]of[[n-24,"#2c4f8f"],[n-9,"#7b9bd2"]]){g.strokeStyle=col;g.lineWidth=7;g.lineCap="round";g.beginPath();
-    for(let x=14;x<=n-14;x+=4){const y=yy+Math.sin(x/13)*5;x===14?g.moveTo(x,y):g.lineTo(x,y)}g.stroke()}
-  if(l.badges)tag("3","#ff3b30");if(showAlgo)tag("✦","#9b5cff");
+  const l=LEVELS[i];let ai=i;while(!LEVELS[ai].chapter)ai--;const ch=LEVELS[ai].chapter;$("lvTime").textContent=l.time;$("lvAct").textContent=`${ACTS[ch].n} · ${ch}`;$("lvName").textContent=l.name;$("lvRule").textContent=l.rule;
+  drawLevelPreview(l);
   $("levelO").hidden=false;tone(392,.3,"sine",.05,523);
+}
+// ---------- level card picture: the rule in one drawing ----------
+const PREVIEW={
+  "Morning":{tiles:[{},{},{}],end:"burst"},
+  "Afternoon":{tiles:[{badge:"3"},{},{}],end:"burst"},
+  "2 A.M.":{tiles:[{},{glow:"#c084fc"},{}],end:"burst"},
+  "Can't Sleep":{tiles:[{f:"grey"},{f:"grey"},{f:"grey"}],end:"ring"},
+  "Sleeping In":{tiles:[{flip:1},{},{}],end:"burst"},
+  "Plans":{at:90,tiles:[{f:"plan"}],end:"ring"},
+  "Deliveries":{at:90,tiles:[{f:"box"}],end:"burst"},
+  "The Sea":{at:90,tiles:[{}],end:"sea"},
+  "Sinking":{at:90,tiles:[{}],end:"sink"},
+  "REM":{tiles:[{alpha:.45},{alpha:.45},{alpha:.45}],end:"dissolve"}
+};
+function drawLevelPreview(l){
+  const pc=$("lvPrev"),g=pc.getContext("2d"),W=pc.width,H=pc.height,a=APPS[l.types[0]];
+  const P=PREVIEW[l.name]||{tiles:[{}],end:"burst"},TS=110,GAP=22,ROW=H/2-TS/2,n=P.tiles.length,x0=P.at??28;
+  const faceOf=t=>t.f==="grey"?greyFace(a,TS):t.f==="plan"?planFace(0,TS):t.f==="box"?boxFace(0,TS):faceCanvas(a,TS);
+  const badge=(x,y,label)=>{g.fillStyle="#fff";g.beginPath();g.arc(x,y,26,0,7);g.fill();g.fillStyle="#ff3b30";g.beginPath();g.arc(x,y,21,0,7);g.fill();
+    g.fillStyle="#fff";g.font='700 28px "Instrument Sans", system-ui, sans-serif';g.textAlign="center";g.textBaseline="middle";g.fillText(label,x,y+2)};
+  const arrow=(x1,y1,x2,y2)=>{g.strokeStyle="#ff6a3d";g.lineWidth=8;g.lineCap="round";g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
+    const t=Math.atan2(y2-y1,x2-x1);g.fillStyle="#ff6a3d";g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-22*Math.cos(t-.45),y2-22*Math.sin(t-.45));g.lineTo(x2-22*Math.cos(t+.45),y2-22*Math.sin(t+.45));g.closePath();g.fill()};
+  const burst=(cx,cy,r,col)=>{g.fillStyle=col;g.beginPath();for(let k=0;k<16;k++){const rr=k%2?r*.55:r,t=-Math.PI/2+k*Math.PI/8;g.lineTo(cx+Math.cos(t)*rr,cy+Math.sin(t)*rr)}g.closePath();g.fill()};
+  const ring=(cx,cy)=>{g.fillStyle="rgba(16,16,30,.55)";g.beginPath();g.arc(cx,cy,52,0,7);g.fill();g.strokeStyle="#fff";g.lineWidth=6;g.beginPath();g.arc(cx,cy,40,0,7);g.stroke();
+    g.fillStyle="#fff";g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,33,-Math.PI/2,-Math.PI/2+Math.PI*1.25);g.closePath();g.fill()};
+  g.clearRect(0,0,W,H);
+  const endX=W-70,endY=H/2,lastX=x0+(n-1)*(TS+GAP)+TS;
+  if(P.end==="sink"){g.fillStyle="#b59cff";g.shadowColor="#b59cff";g.shadowBlur=30;g.beginPath();g.ellipse(x0+TS/2,ROW+TS+8,TS*.8,22,0,0,7);g.fill();g.shadowBlur=0}
+  P.tiles.forEach((t,i)=>{const x=x0+i*(TS+GAP),y=ROW;
+    g.save();g.globalAlpha=t.alpha??1;g.translate(x+TS/2,y+TS/2);if(t.flip)g.rotate(Math.PI);g.translate(-TS/2,-TS/2);
+    if(t.glow){g.shadowColor=t.glow;g.shadowBlur=34}
+    rrPath(g,0,0,TS,TS,30);g.fillStyle="#fff";g.fill();g.shadowBlur=0;g.clip();g.drawImage(faceOf(t),0,0,TS,TS);g.restore();
+    if(t.badge)badge(x+TS-14,y+14,t.badge)});
+  if(P.end==="sea"){g.strokeStyle="#7b9bd2";g.lineWidth=7;g.lineCap="round";for(const yy of[H-34,H-16]){g.beginPath();for(let x=14;x<=W-14;x+=4){const y=yy+Math.sin(x/13)*5;x===14?g.moveTo(x,y):g.lineTo(x,y)}g.stroke()}
+    arrow(lastX+14,H/2,W-16,H/2)}
+  else if(P.end==="sink"){}
+  else if(P.end==="dissolve"){g.fillStyle="#ffd9e6";for(let k=0;k<18;k++){const x=endX+Math.sin(k*2.3)*46,y=endY+Math.cos(k*1.7)*40;g.globalAlpha=.3+.5*(k%3)/2;g.beginPath();g.arc(x,y,4+(k%4)*2,0,7);g.fill()}g.globalAlpha=1;arrow(lastX+14,H/2,endX-60,H/2)}
+  else{arrow(lastX+14,H/2,endX-60,H/2);P.end==="ring"?ring(endX,endY):burst(endX,endY,52,"#ffb020")}
 }
 function rrPath(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
 function beginLevel(){$("pauseO").hidden=true;$("levelO").hidden=true;$("endO").hidden=true;$("startO").hidden=true;$("hud").hidden=false;$("dock").hidden=false;setMode("play");hud();tone(440,.12,"sine",.07,880)}
@@ -1144,8 +1175,8 @@ function levelDone(){
 let dayBack=0;
 function lose(){
   if(mode!=="play")return;setMode("end");hideBanner();hideCallout();setMood(DUSK,DUSK_LIGHT,1.6);tone(220,.6,"sawtooth",.06,70);
-  $("endAct").hidden=true;$("endh").textContent="Screen time wins.";$("endstat").textContent=`${fmt(screen)} on your phone.`;
-  $("endp").textContent=`You deleted ${uninstalled} of ${TYPES.length} apps. Sending them away didn't count.`;
+  $("endAct").hidden=true;$("endh").textContent="Phone full.";$("endstat").textContent=`${fmt(screen)} on your phone.`;
+  $("endp").textContent=`No room for more apps. You deleted ${uninstalled} of ${TYPES.length}. Sending them away didn't count.`;
   $("share").hidden=true;$("next").hidden=true;$("last").hidden=true;$("again").textContent="Try again";againAction=()=>{setupLevel(lvl);beginLevel()};
   setTimeout(()=>{$("endO").hidden=false},900);
 }
