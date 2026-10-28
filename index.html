@@ -63,7 +63,7 @@ button{font:inherit;border:0;cursor:pointer}
 .welcome::after{content:"";position:fixed;left:0;right:0;bottom:0;height:42%;background:linear-gradient(rgba(20,18,40,0),rgba(20,18,40,.5));z-index:-1;pointer-events:none}
 .welcome .wtop,.welcome .wbot{pointer-events:auto}
 .wclock{color:#fffaf3!important;opacity:.9;animation:rise 1s .7s both;text-shadow:0 2px 10px rgba(0,0,0,.3)}
-.wtitle{font-family:'Lilita One',var(--display);line-height:.92!important;font-size:clamp(58px,18vw,112px);line-height:.86;text-transform:uppercase;margin:8px 0 14px;background:linear-gradient(180deg,#fff6d6 0%,#ffd23f 42%,#ff8a1f 70%,#ff5a2a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(3px 0 0 #ff4fa3) drop-shadow(-3px 0 0 #ff4fa3) drop-shadow(0 3px 0 #ff4fa3) drop-shadow(0 -3px 0 #ff4fa3) drop-shadow(5px 5px 0 #2b2440) drop-shadow(-5px 5px 0 #2b2440) drop-shadow(0 9px 0 #2b2440) drop-shadow(0 18px 26px rgba(20,16,40,.45));animation:rise 1.3s 1s both}
+.wtitle{font-family:'Lilita One',var(--display);line-height:.92!important;font-size:clamp(58px,18vw,112px);line-height:.86;text-transform:uppercase;margin:8px 0 14px;background:linear-gradient(180deg,#fff6d6 0%,#ffd23f 42%,#ff8a1f 70%,#ff5a2a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(3px 0 0 #ffffff) drop-shadow(-3px 0 0 #ffffff) drop-shadow(0 3px 0 #ffffff) drop-shadow(0 -3px 0 #ffffff) drop-shadow(5px 5px 0 #2b2440) drop-shadow(-5px 5px 0 #2b2440) drop-shadow(0 9px 0 #2b2440) drop-shadow(0 18px 26px rgba(20,16,40,.45));animation:rise 1.3s 1s both}
 .wtitle span{background:linear-gradient(180deg,#ffb2ff,#ff6fb5 55%,#b65cff);-webkit-background-clip:text;background-clip:text}
 .wtag{margin:0;display:inline-block;padding:9px 18px;border-radius:14px;border:3px solid #2b2440;background:linear-gradient(180deg,#34d399,#22b07d);color:#fff;font:700 14px var(--body);letter-spacing:.04em;text-transform:uppercase;text-shadow:0 2px 0 #1a6b4c;box-shadow:0 4px 0 #2b2440;rotate:-3deg;animation:rise 1s 1.7s both}
 .wbot{display:flex;flex-direction:column;align-items:center;gap:12px;animation:rise 1s 2.3s both}
@@ -1125,9 +1125,9 @@ function drawLevelPreview(l){
   const faceOf=t=>t.f==="grey"?greyFace(a,TS):t.f==="plan"?planFace(0,TS):t.f==="box"?boxFace(0,TS):faceCanvas(a,TS);
   const badge=(x,y,label)=>{g.fillStyle="#fff";g.beginPath();g.arc(x,y,26,0,7);g.fill();g.fillStyle="#ff3b30";g.beginPath();g.arc(x,y,21,0,7);g.fill();
     g.fillStyle="#fff";g.font='700 28px "Instrument Sans", system-ui, sans-serif';g.textAlign="center";g.textBaseline="middle";g.fillText(label,x,y+2)};
-  const arrow=(x1,y1,x2,y2)=>{const gr=g.createLinearGradient(x1,y1,x2,y2);gr.addColorStop(0,"#ffd23f");gr.addColorStop(1,"#ff4fa3");
+  const arrow=(x1,y1,x2,y2)=>{const gr=g.createLinearGradient(x1,y1,x2,y2);gr.addColorStop(0,"#ffd23f");gr.addColorStop(1,"#ffffff");
     g.strokeStyle=gr;g.lineWidth=9;g.lineCap="round";g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
-    const t=Math.atan2(y2-y1,x2-x1);g.fillStyle="#ff4fa3";g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-22*Math.cos(t-.45),y2-22*Math.sin(t-.45));g.lineTo(x2-22*Math.cos(t+.45),y2-22*Math.sin(t+.45));g.closePath();g.fill()};
+    const t=Math.atan2(y2-y1,x2-x1);g.fillStyle="#ffffff";g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-22*Math.cos(t-.45),y2-22*Math.sin(t-.45));g.lineTo(x2-22*Math.cos(t+.45),y2-22*Math.sin(t+.45));g.closePath();g.fill()};
   const burst=(cx,cy,r,col)=>{g.fillStyle=col;g.beginPath();for(let k=0;k<16;k++){const rr=k%2?r*.55:r,t=-Math.PI/2+k*Math.PI/8;g.lineTo(cx+Math.cos(t)*rr,cy+Math.sin(t)*rr)}g.closePath();g.fill()};
   const puff=(cx,cy,r)=>{const pts=[];for(let k=0;k<8;k++){const t=k*Math.PI/4;pts.push([cx+Math.cos(t)*r*.62,cy+Math.sin(t)*r*.62])}
     g.fillStyle="#2b2440";for(const[x,y]of pts){g.beginPath();g.arc(x,y,r*.4+4,0,7);g.fill()}g.beginPath();g.arc(cx,cy,r*.8+4,0,7);g.fill();
