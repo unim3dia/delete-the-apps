@@ -63,11 +63,11 @@ button{font:inherit;border:0;cursor:pointer}
 .welcome::after{content:"";position:fixed;left:0;right:0;bottom:0;height:42%;background:linear-gradient(rgba(20,18,40,0),rgba(20,18,40,.5));z-index:-1;pointer-events:none}
 .welcome .wtop,.welcome .wbot{pointer-events:auto}
 .wclock{color:#fffaf3!important;opacity:.9;animation:rise 1s .7s both;text-shadow:0 2px 10px rgba(0,0,0,.3)}
-.wtitle{font-family:'Lilita One',var(--display);line-height:.92!important;font-size:clamp(58px,18vw,112px);line-height:.86;text-transform:uppercase;margin:8px 0 14px;background:linear-gradient(180deg,#fff6d6 0%,#ffd23f 42%,#ff8a1f 70%,#ff5a2a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(3px 0 0 #000) drop-shadow(-3px 0 0 #000) drop-shadow(0 3px 0 #000) drop-shadow(0 -3px 0 #000) drop-shadow(5px 5px 0 #2b2440) drop-shadow(-5px 5px 0 #2b2440) drop-shadow(0 9px 0 #2b2440) drop-shadow(0 18px 26px rgba(20,16,40,.45));animation:rise 1.3s 1s both}
+.wtitle{font-family:'Lilita One',var(--display);line-height:.92!important;font-size:clamp(58px,18vw,112px);line-height:.86;text-transform:uppercase;margin:8px 0 14px;background:linear-gradient(180deg,#fff6d6 0%,#ffd23f 42%,#ff8a1f 70%,#ff5a2a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(4px 0 0 #8a8a8a) drop-shadow(-4px 0 0 #8a8a8a) drop-shadow(0 4px 0 #8a8a8a) drop-shadow(0 -4px 0 #8a8a8a) drop-shadow(6px 0 0 #000) drop-shadow(-6px 0 0 #000) drop-shadow(0 6px 0 #000) drop-shadow(0 -6px 0 #000) drop-shadow(0 14px 22px rgba(20,16,40,.5));animation:rise 1.3s 1s both}
 .wtitle span{background:linear-gradient(180deg,#ffb2ff,#ff6fb5 55%,#b65cff);-webkit-background-clip:text;background-clip:text}
 .wtag{margin:0;display:inline-block;padding:9px 18px;border-radius:14px;border:3px solid #2b2440;background:linear-gradient(180deg,#34d399,#22b07d);color:#fff;font:700 14px var(--body);letter-spacing:.04em;text-transform:uppercase;text-shadow:0 2px 0 #1a6b4c;box-shadow:0 4px 0 #2b2440;rotate:-3deg;animation:rise 1s 1.7s both}
 .wbot{display:flex;flex-direction:column;align-items:center;gap:12px;animation:rise 1s 2.3s both}
-.go.big{margin-bottom:34px;font-family:'Lilita One',var(--display);font-size:40px;padding:18px 62px;background:linear-gradient(180deg,#ff9a4c,#ff4d2e);box-shadow:0 7px 0 #b8330f,0 0 0 4px #2b2440,0 0 36px rgba(255,160,60,.7);color:#fff;text-shadow:0 3px 0 #b8330f;animation:glow 2.2s ease-in-out infinite}
+.go.big{margin-bottom:34px;font-family:'Lilita One',var(--display);font-size:50px;padding:18px 62px;background:linear-gradient(180deg,#ff9a4c,#ff4d2e);box-shadow:0 7px 0 #b8330f,0 0 0 4px #2b2440,0 0 36px rgba(255,160,60,.7);color:#fff;text-shadow:0 3px 0 #b8330f;animation:glow 2.2s ease-in-out infinite}
 @keyframes glow{50%{box-shadow:0 7px 0 #b8330f,0 0 0 4px #2b2440,0 0 56px rgba(255,190,80,.95)}}
 .wsub{margin:0;color:#fffaf3;font-size:14px;opacity:.92;text-shadow:0 1px 8px rgba(0,0,0,.4)}
 .wrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
@@ -118,7 +118,6 @@ button{font:inherit;border:0;cursor:pointer}
 .lvstat{font-size:14px;font-weight:700;max-width:30ch;color:#2b2440;margin:0!important}
 .lvstat .stars{font-size:22px;line-height:1;display:block}
 .lvcard #lvGo{font-size:24px;padding:16px 48px;background:linear-gradient(180deg,#ff8a4c,#ff4d2e);box-shadow:0 6px 0 #b8330f,0 0 0 3px #2b2440;color:#fff;text-shadow:0 2px 0 #b8330f}
-.lvcard #lvGo::after{content:" \25B6";font-size:.75em}
 .lvcard #resume{font-size:24px;padding:16px 48px;background:linear-gradient(180deg,#ff8a4c,#ff4d2e);box-shadow:0 6px 0 #b8330f,0 0 0 3px #2b2440;color:#fff;text-shadow:0 2px 0 #b8330f}
 .lvcard #lvGo:active{box-shadow:0 2px 0 #b8330f,0 0 0 3px #2b2440}
 .lvcard .ghost{text-decoration:none;opacity:1;padding:10px 22px;border-radius:999px;border:3px solid #2b2440;background:linear-gradient(180deg,#7cb4ff,#4a7fd6);box-shadow:0 3px 0 #2b2440;font-family:var(--display);text-transform:uppercase;font-size:13px;letter-spacing:.04em;color:#fff;text-shadow:0 2px 0 #2b2440}
@@ -566,34 +565,34 @@ function buildAppMats(){updMats=APPS.map(a=>{const t=new THREE.CanvasTexture(gre
 // ---------- levels: one day into one night, in three acts ----------
 const ACTS={"Awake":{n:"Act I",sub:"The day you can't put it down"},"Dreams":{n:"Act II",sub:"You fall asleep. The apps follow you in"},"Deep Sleep":{n:"Act III",sub:"The road lets go"}};
 const LEVELS=[
- {name:"Morning",time:"8:41 AM",chapter:"Awake",learn:"the basics",
+ {name:"Morning",cardTitle:"Match 3",time:"8:41 AM",chapter:"Awake",learn:"the basics",
   rule:"Match 3 of the same app to delete it for good.",types:[0,1,2,3,4],copies:6,spawn:[1.6,.85],tick:.5,banner:[10,15],
   sky:{top:"#4f6590",hor:"#8d9cbb"},light:{sun:.82,col:"#fff4e8",hemi:.62,glow:0,stars:0},lift:.4},
- {name:"Afternoon",learn:"notifications",time:"3:12 PM",types:[5,6,7,8,9,11],copies:6,spawn:[1.45,.8],tick:.5,banner:[6,9],badges:.3,
+ {name:"Afternoon",cardTitle:"Badges",learn:"notifications",time:"3:12 PM",types:[5,6,7,8,9,11],copies:6,spawn:[1.45,.8],tick:.5,banner:[6,9],badges:.3,
   sky:{top:"#b9705e",hor:"#f0b98a"},light:{sun:.95,col:"#ffd29a",hemi:.55,glow:.05,stars:0},lift:.35,
   rule:"Tap to clear notification badges so apps can be sent away."},
- {name:"2 A.M.",learn:"the algorithm",time:"2:07 AM",types:[0,4,10,2,3,9],copies:5,spawn:[1.35,.75],tick:.45,banner:[10,14],algo:true,algoEvery:[16,24],
+ {name:"2 A.M.",cardTitle:"Algorithm",learn:"the algorithm",time:"2:07 AM",types:[0,4,10,2,3,9],copies:5,spawn:[1.35,.75],tick:.45,banner:[10,14],algo:true,algoEvery:[16,24],
   sky:{top:"#0f1328",hor:"#2c3157"},light:{sun:.22,col:"#9fb2ff",hemi:.24,glow:.55,stars:.35},lift:.75,
   rule:"Recommended apps copy the apps beside them, and the feed speeds up."},
- {name:"Can't Sleep",learn:"updates",time:"2:58 AM",types:[0,1,2,6,4,5,13],copies:5,spawn:[1.3,.7],tick:.42,banner:[9,13],updates:.3,algo:true,algoStart:28,algoEvery:[24,34],
+ {name:"Can't Sleep",cardTitle:"Updates",learn:"updates",time:"2:58 AM",types:[0,1,2,6,4,5,13],copies:5,spawn:[1.3,.7],tick:.42,banner:[9,13],updates:.3,algo:true,algoStart:28,algoEvery:[24,34],
   sky:{top:"#05060f",hor:"#1b1d3d"},light:{sun:.16,col:"#8a9cff",hemi:.18,glow:.7,stars:1},lift:.8,
   rule:"Apps are updating overnight. A frozen app can't be sent away or matched until its update finishes."},
- {name:"Sleeping In",learn:"flipping",time:"3:20 AM",chapter:"Dreams",enterH:"You fall asleep.",enterP:"Your eyes close. The apps follow you in.",cue:"The dream shifts.",fresh:true,env:"bed",dream:true,puffy:true,orient:true,types:[0,1,3,4,5,6],copies:6,spawn:[1.65,.85],tick:.5,banner:[10,15],
+ {name:"Sleeping In",cardTitle:"Flip",learn:"flipping",time:"3:20 AM",chapter:"Dreams",enterH:"You fall asleep.",enterP:"Your eyes close. The apps follow you in.",cue:"The dream shifts.",fresh:true,env:"bed",dream:true,puffy:true,orient:true,types:[0,1,3,4,5,6],copies:6,spawn:[1.65,.85],tick:.5,banner:[10,15],
   sky:{top:"#8a90d4",hor:"#f3d2dc"},light:{sun:.82,col:"#ffe2d6",hemi:.72,glow:.1,stars:.12},lift:.35,
   rule:"Only apps facing the same way match. Swipe up to flip one. Three upside down count double."},
- {name:"Plans",learn:"plans",time:"3:34 AM",cue:"The dream shifts.",fresh:true,env:"city",dream:true,puffy:true,plans:6,planBeats:30,types:[9,8,7,1,11,4],copies:5,spawn:[1.5,.8],tick:.48,banner:[8,12],
+ {name:"Plans",cardTitle:"Plans",learn:"plans",time:"3:34 AM",cue:"The dream shifts.",fresh:true,env:"city",dream:true,puffy:true,plans:6,planBeats:30,types:[9,8,7,1,11,4],copies:5,spawn:[1.5,.8],tick:.48,banner:[8,12],
   sky:{top:"#5a6cc0",hor:"#cbb7e8"},light:{sun:.95,col:"#fff0f4",hemi:.7,glow:.05,stars:.1},lift:.35,
   rule:"Plain cushions are your plans, not apps. Don't send them away. Bring one to the front and it happens. Leave it stuck too long and it's cancelled."},
- {name:"Deliveries",learn:"containers",time:"3:47 AM",cue:"The dream shifts.",fresh:true,env:"canyon",dream:true,puffy:true,boxes:8,types:[12,0,10,2,5,6],copies:5,spawn:[1.4,.75],tick:.45,banner:[8,12],
+ {name:"Deliveries",cardTitle:"Containers",learn:"containers",time:"3:47 AM",cue:"The dream shifts.",fresh:true,env:"canyon",dream:true,puffy:true,boxes:8,types:[12,0,10,2,5,6],copies:5,spawn:[1.4,.75],tick:.45,banner:[8,12],
   sky:{top:"#7a6cb6",hor:"#f0c4b4"},light:{sun:.92,col:"#ffd8c0",hemi:.62,glow:.05,stars:.1},lift:.35,
   rule:"Your deliveries arrived all at once. Containers are too heavy to move. Match an app right next to one to open it."},
- {name:"The Sea",learn:"the sea",time:"3:59 AM",cue:"The dream shifts.",env:"sea",dream:true,puffy:true,sea:true,waves:[8,12],surge:[13,7,.6,1.2],fastDrop:true,types:[0,1,2,4,6,7,13],copies:6,spawn:[1.05,.6],tick:.36,banner:[9,13],
+ {name:"The Sea",cardTitle:"Sea",learn:"the sea",time:"3:59 AM",cue:"The dream shifts.",env:"sea",dream:true,puffy:true,sea:true,waves:[8,12],surge:[13,7,.6,1.2],fastDrop:true,types:[0,1,2,4,6,7,13],copies:6,spawn:[1.05,.6],tick:.36,banner:[9,13],
   sky:{top:"#4d68b0",hor:"#c4c0e6"},light:{sun:.9,col:"#fff0ea",hemi:.72,glow:.05,stars:.12},lift:.35,
   rule:"Swipe an app off the edge to delete it."},
- {name:"Sinking",learn:"soft cushions",time:"4:12 AM",chapter:"Deep Sleep",enterH:"Deeper.",enterP:"The dreams thin out. The road goes soft as a mattress.",fresh:true,env:"night",deep:true,soft:[[1,0],[0,2],[2,2]],types:[0,1,4,7,9,10],copies:4,spawn:[1.55,.85],tick:.5,banner:[14,20],
+ {name:"Sinking",cardTitle:"Cushions",learn:"soft cushions",time:"4:12 AM",chapter:"Deep Sleep",enterH:"Deeper.",enterP:"The dreams thin out. The road goes soft as a mattress.",fresh:true,env:"night",deep:true,soft:[[1,0],[0,2],[2,2]],types:[0,1,4,7,9,10],copies:4,spawn:[1.55,.85],tick:.5,banner:[14,20],
   sky:{top:"#0a0f2e",hor:"#2b3062"},light:{sun:.4,col:"#b8c4ff",hemi:.38,glow:.55,stars:1},lift:.5,
   rule:"An app that stops on a glowing cushion sinks and gets stuck. Roll a matching app onto it and the cushion takes both."},
- {name:"REM",learn:"letting go",time:"4:44 AM",cue:"Deeper still.",fresh:true,env:"sky",deep:true,rem:true,puffy:true,noBanner:true,types:[0,2,3,5,6,13],copies:5,spawn:[1.35,.75],tick:.46,banner:[30,40],
+ {name:"REM",cardTitle:"Letting Go",learn:"letting go",time:"4:44 AM",cue:"Deeper still.",fresh:true,env:"sky",deep:true,rem:true,puffy:true,noBanner:true,types:[0,2,3,5,6,13],copies:5,spawn:[1.35,.75],tick:.46,banner:[30,40],
   sky:{top:"#2c2860",hor:"#a07fb8"},light:{sun:.72,col:"#ffd9e6",hemi:.62,glow:.25,stars:.6},lift:1,
   rule:"The deepest part of the night. Every match dissolves a row of road. Anything that rolls off the edge is gone."}
 ];
@@ -1101,7 +1100,7 @@ function setupLevel(i){
 }
 function showIntro(i){
   setupLevel(i);setMode("intro");$("hud").hidden=true;$("dock").hidden=true;$("endO").hidden=true;$("lvStat").hidden=true;
-  const l=LEVELS[i];$("lvTime").hidden=true;$("lvAct").textContent=`Level ${i+1} of ${LEVELS.length}`;$("lvName").textContent=l.name;$("lvRule").textContent=l.rule;
+  const l=LEVELS[i];$("lvTime").hidden=true;$("lvAct").textContent=`Level ${i+1} of ${LEVELS.length}`;$("lvName").textContent=l.cardTitle;$("lvRule").textContent=l.rule;
   $("levelO").querySelector(".lvcard").style.setProperty("--tint",l.sky.hor);
   drawLevelPreview(l);
   $("levelO").hidden=false;tone(392,.3,"sine",.05,523);
@@ -1176,7 +1175,7 @@ function levelDone(){
     $("endh").textContent=nx.enterH||`${L.name}, cleared.`;$("endstat").innerHTML=`<span class="stars">${stars(st)}</span>`;
     $("endp").textContent=`${fmt(screen)} of screen time. `+(nx.enterP||nx.cue||`It's ${nx.time} and they're back.`);
     $("next").textContent=`Next: ${LEVELS[lvl+1].name}`;$("next").hidden=false;$("again").textContent="Replay";againAction=()=>{setupLevel(lvl);beginLevel()};
-    const statHtml=`<span class="stars">${stars(st)}</span>${L.name} cleared`;
+    const statHtml=`Level ${lvl+1} cleared`;
     setTimeout(()=>{showIntro(lvl+1);$("lvStat").innerHTML=statHtml;$("lvStat").hidden=false},1500);
   }else{
     freed=true;setMood(DAWN,DAWN_LIGHT,4);setTimeout(()=>{$("hud").hidden=true},2000);$("endAct").hidden=true;
