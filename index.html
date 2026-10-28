@@ -151,13 +151,13 @@ button{font:inherit;border:0;cursor:pointer}
 
 <div class="overlay" id="howO" hidden><div class="card">
   <h2>How to play</h2>
-  <p>Apps fall out of the sky and roll toward you. Delete every app in your dock before your screen time hits 8 hours.</p>
+  <p>Apps roll toward you. Let them come down, then match 3 of the same app to delete it.</p>
   <ul class="rules">
-    <li><span><b>Group 3 of the same app</b> to delete them for good.</span></li>
-    <li id="ruleClose"><span><b>Tap</b> or flick up to close an app. It'll come back.</span></li>
-    <li><span><b>Swipe sideways</b> to change lanes, <b>down</b> to drop it to the front.</span></li>
-    <li><span>If a lane overflows, that app installs and costs you screen time.</span></li>
-    <li><span>One day in three acts: <b>Awake</b>, <b>Dreams</b> and <b>Deep Sleep</b>. Every level adds one new thing.</span></li>
+    <li><span><b>Match 3</b> of the same app to delete it for good.</span></li>
+    <li id="ruleClose"><span><b>Tap</b> or flick up to send an app away. It comes back later.</span></li>
+    <li><span><b>Swipe sideways</b> to switch lanes. <b>Swipe down</b> to bring an app to you.</span></li>
+    <li><span>If a lane fills up, an app installs and adds screen time.</span></li>
+    <li><span>Three acts: <b>Awake</b>, <b>Dreams</b>, <b>Deep Sleep</b>. Each level adds one new idea.</span></li>
   </ul>
   <button class="go" id="howBack">Got it</button>
 </div></div>
@@ -558,35 +558,35 @@ function buildAppMats(){updMats=APPS.map(a=>{const t=new THREE.CanvasTexture(gre
 const ACTS={"Awake":{n:"Act I",sub:"The day you can't put it down"},"Dreams":{n:"Act II",sub:"You fall asleep. The apps follow you in"},"Deep Sleep":{n:"Act III",sub:"The road lets go"}};
 const LEVELS=[
  {name:"Morning",time:"8:41 AM",chapter:"Awake",learn:"the basics",
-  rule:"Apps fall out of the sky and roll toward you. Closing one only sends it away for a while. Group 3 of the same app to delete it for good, and clear every app in your dock.",types:[0,1,2,3,4],copies:6,spawn:[1.6,.85],tick:.5,banner:[10,15],
+  rule:"Match 3 of the same app to delete it for good.",types:[0,1,2,3,4],copies:6,spawn:[1.6,.85],tick:.5,banner:[10,15],
   sky:{top:"#4f6590",hor:"#8d9cbb"},light:{sun:.82,col:"#fff4e8",hemi:.62,glow:0,stars:0},lift:.4},
  {name:"Afternoon",learn:"notifications",time:"3:12 PM",types:[5,6,7,8,9,11],copies:6,spawn:[1.45,.8],tick:.5,banner:[6,9],badges:.3,
   sky:{top:"#b9705e",hor:"#f0b98a"},light:{sun:.95,col:"#ffd29a",hemi:.55,glow:.05,stars:0},lift:.35,
-  rule:"Some apps arrive with notifications. Each tap clears one, and they won't close until they're at zero. Matching deletes them instantly."},
+  rule:"Tap to clear notification badges so apps can be sent away."},
  {name:"2 A.M.",learn:"the algorithm",time:"2:07 AM",types:[0,4,10,2,3,9],copies:5,spawn:[1.35,.75],tick:.45,banner:[10,14],algo:true,algoEvery:[16,24],
   sky:{top:"#0f1328",hor:"#2c3157"},light:{sun:.22,col:"#9fb2ff",hemi:.24,glow:.55,stars:.35},lift:.75,
-  rule:"Recommended apps turn the apps beside them into more of the same, and the feed speeds up while they're here. You can't close them. Slide one where you want more, then match it."},
+  rule:"Recommended apps copy the apps beside them, and the feed speeds up."},
  {name:"Can't Sleep",learn:"updates",time:"2:58 AM",types:[0,1,2,6,4,5,13],copies:5,spawn:[1.3,.7],tick:.42,banner:[9,13],updates:.3,algo:true,algoStart:28,algoEvery:[24,34],
   sky:{top:"#05060f",hor:"#1b1d3d"},light:{sun:.16,col:"#8a9cff",hemi:.18,glow:.7,stars:1},lift:.8,
-  rule:"You should be asleep. Your apps update overnight, and an updating app is frozen: it can't be closed or matched until it finishes. Line it up now and it pays off later. The algorithm is still awake."},
+  rule:"Apps are updating overnight. A frozen app can't be sent away or matched until its update finishes."},
  {name:"Sleeping In",learn:"flipping",time:"3:20 AM",chapter:"Dreams",enterH:"You fall asleep.",enterP:"Your eyes close. The apps follow you in.",cue:"The dream shifts.",fresh:true,env:"bed",dream:true,puffy:true,orient:true,types:[0,1,3,4,5,6],copies:6,spawn:[1.65,.85],tick:.5,banner:[10,15],
   sky:{top:"#8a90d4",hor:"#f3d2dc"},light:{sun:.82,col:"#ffe2d6",hemi:.72,glow:.1,stars:.12},lift:.35,
-  rule:"You dream you're scrolling in bed and the screen keeps flipping. Apps land right side up or upside down, and only apps facing the same way match. Swipe up to flip one. Three upside down count double."},
+  rule:"Only apps facing the same way match. Swipe up to flip one. Three upside down count double."},
  {name:"Plans",learn:"plans",time:"3:34 AM",cue:"The dream shifts.",fresh:true,env:"city",dream:true,puffy:true,plans:6,planBeats:30,types:[9,8,7,1,11,4],copies:5,spawn:[1.5,.8],tick:.48,banner:[8,12],
   sky:{top:"#5a6cc0",hor:"#cbb7e8"},light:{sun:.95,col:"#fff0f4",hemi:.7,glow:.05,stars:.1},lift:.35,
-  rule:"In the dream you have plans. Not everything falling is an app: the plain cushions are your plans. You can't close them, and you don't want to. Get one to the front of the road and it happens. Leave it stuck too long and it gets cancelled."},
+  rule:"Plain cushions are your plans, not apps. Don't send them away. Bring one to the front and it happens. Leave it stuck too long and it's cancelled."},
  {name:"Deliveries",learn:"containers",time:"3:47 AM",cue:"The dream shifts.",fresh:true,env:"canyon",dream:true,puffy:true,boxes:8,types:[12,0,10,2,5,6],copies:5,spawn:[1.4,.75],tick:.45,banner:[8,12],
   sky:{top:"#7a6cb6",hor:"#f0c4b4"},light:{sun:.92,col:"#ffd8c0",hemi:.62,glow:.05,stars:.1},lift:.35,
-  rule:"Everything you ever ordered arrives at once. Containers are too heavy to close or move. Set off a match right next to one to break it open."},
+  rule:"Your deliveries arrived all at once. Containers are too heavy to move. Match an app right next to one to open it."},
  {name:"The Sea",learn:"the sea",time:"3:59 AM",cue:"The dream shifts.",env:"sea",dream:true,puffy:true,sea:true,waves:[8,12],surge:[13,7,.6,1.2],fastDrop:true,types:[0,1,2,4,6,7,13],copies:6,spawn:[1.05,.6],tick:.36,banner:[9,13],
   sky:{top:"#4d68b0",hor:"#c4c0e6"},light:{sun:.9,col:"#fff0ea",hemi:.72,glow:.05,stars:.12},lift:.35,
-  rule:"The dream road runs out into the sea. Swipe an app off the edge and it's gone for good, one at a time. Now and then a wave washes over a row and pushes everything sideways."},
+  rule:"Swipe an app off the edge to delete it."},
  {name:"Sinking",learn:"soft cushions",time:"4:12 AM",chapter:"Deep Sleep",enterH:"Deeper.",enterP:"The dreams thin out. The road goes soft as a mattress.",fresh:true,env:"night",deep:true,soft:[[1,0],[0,2],[2,2]],types:[0,1,4,7,9,10],copies:4,spawn:[1.55,.85],tick:.5,banner:[14,20],
   sky:{top:"#0a0f2e",hor:"#2b3062"},light:{sun:.4,col:"#b8c4ff",hemi:.38,glow:.55,stars:1},lift:.5,
-  rule:"The road goes soft. An app that stops on a glowing cushion sinks in and gets stuck. Roll a second one of the same app onto it and the cushion swallows them both."},
+  rule:"An app that stops on a glowing cushion sinks and gets stuck. Roll a matching app onto it and the cushion takes both."},
  {name:"REM",learn:"letting go",time:"4:44 AM",cue:"Deeper still.",fresh:true,env:"sky",deep:true,rem:true,puffy:true,noBanner:true,types:[0,2,3,5,6,13],copies:5,spawn:[1.35,.75],tick:.46,banner:[30,40],
   sky:{top:"#2c2860",hor:"#a07fb8"},light:{sun:.72,col:"#ffd9e6",hemi:.62,glow:.25,stars:.6},lift:1,
-  rule:"The deepest part of the night. Every match you make dissolves a row of road. Whatever rolls off the edge falls into the sky and is gone."}
+  rule:"The deepest part of the night. Every match dissolves a row of road. Anything that rolls off the edge is gone."}
 ];
 const MORNING_LIGHT=LEVELS[0].light,DAWN_LIGHT={sun:.95,col:"#fff1dc",hemi:.75,glow:0,stars:0},DUSK_LIGHT={sun:.4,col:"#c9a0ff",hemi:.4,glow:.3,stars:.2};
 
@@ -1145,7 +1145,7 @@ let dayBack=0;
 function lose(){
   if(mode!=="play")return;setMode("end");hideBanner();hideCallout();setMood(DUSK,DUSK_LIGHT,1.6);tone(220,.6,"sawtooth",.06,70);
   $("endAct").hidden=true;$("endh").textContent="Screen time wins.";$("endstat").textContent=`${fmt(screen)} on your phone.`;
-  $("endp").textContent=`You deleted ${uninstalled} of ${TYPES.length} apps. Closing them didn't count.`;
+  $("endp").textContent=`You deleted ${uninstalled} of ${TYPES.length} apps. Sending them away didn't count.`;
   $("share").hidden=true;$("next").hidden=true;$("last").hidden=true;$("again").textContent="Try again";againAction=()=>{setupLevel(lvl);beginLevel()};
   setTimeout(()=>{$("endO").hidden=false},900);
 }
