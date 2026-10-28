@@ -63,15 +63,11 @@ button{font:inherit;border:0;cursor:pointer}
 .welcome::after{content:"";position:fixed;left:0;right:0;bottom:0;height:42%;background:linear-gradient(rgba(20,18,40,0),rgba(20,18,40,.5));z-index:-1;pointer-events:none}
 .welcome .wtop,.welcome .wbot{pointer-events:auto}
 .wclock{color:#fffaf3!important;opacity:.9;animation:rise 1s .7s both;text-shadow:0 2px 10px rgba(0,0,0,.3)}
-.wtitle{font-family:'Lilita One',var(--display);line-height:.92!important;font-size:clamp(58px,18vw,112px);line-height:.86;text-transform:uppercase;margin:8px 0 14px;background:linear-gradient(180deg,#fff6d6 0%,#ffd23f 42%,#ff8a1f 70%,#ff5a2a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #2b2440) drop-shadow(0 8px 0 #2b2440) drop-shadow(0 18px 26px rgba(20,16,40,.45));animation:rise 1.3s 1s both}
+.wtitle{font-family:'Lilita One',var(--display);line-height:.92!important;font-size:clamp(58px,18vw,112px);line-height:.86;text-transform:uppercase;margin:8px 0 14px;background:linear-gradient(180deg,#fff6d6 0%,#ffd23f 42%,#ff8a1f 70%,#ff5a2a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(3px 0 0 #ff4fa3) drop-shadow(-3px 0 0 #ff4fa3) drop-shadow(0 3px 0 #ff4fa3) drop-shadow(0 -3px 0 #ff4fa3) drop-shadow(5px 5px 0 #2b2440) drop-shadow(-5px 5px 0 #2b2440) drop-shadow(0 9px 0 #2b2440) drop-shadow(0 18px 26px rgba(20,16,40,.45));animation:rise 1.3s 1s both}
 .wtitle span{background:linear-gradient(180deg,#ffb2ff,#ff6fb5 55%,#b65cff);-webkit-background-clip:text;background-clip:text}
 .wtag{margin:0;display:inline-block;padding:9px 18px;border-radius:14px;border:3px solid #2b2440;background:linear-gradient(180deg,#34d399,#22b07d);color:#fff;font:700 14px var(--body);letter-spacing:.04em;text-transform:uppercase;text-shadow:0 2px 0 #1a6b4c;box-shadow:0 4px 0 #2b2440;rotate:-3deg;animation:rise 1s 1.7s both}
 .wbot{display:flex;flex-direction:column;align-items:center;gap:12px;animation:rise 1s 2.3s both}
-.wcubes{display:flex;gap:10px;align-items:center;justify-content:center;margin:6px 0 4px;animation:rise 1s 1.9s both}
-.wcubes canvas{width:52px;height:52px;border-radius:14px;border:3px solid #2b2440;box-shadow:0 4px 0 #2b2440;background:#fff}
-.wcubes canvas:nth-child(odd){rotate:-6deg}.wcubes canvas:nth-child(even){rotate:5deg;translate:0 -6px}
-.go.big{font-family:'Lilita One',var(--display);font-size:28px;padding:18px 62px;background:linear-gradient(180deg,#ff9a4c,#ff4d2e);box-shadow:0 7px 0 #b8330f,0 0 0 4px #2b2440,0 0 36px rgba(255,160,60,.7);color:#fff;text-shadow:0 3px 0 #b8330f;animation:glow 2.2s ease-in-out infinite}
-.go.big::after{content:" \25B6";font-size:.75em}
+.go.big{font-family:'Lilita One',var(--display);font-size:40px;padding:18px 62px;background:linear-gradient(180deg,#ff9a4c,#ff4d2e);box-shadow:0 7px 0 #b8330f,0 0 0 4px #2b2440,0 0 36px rgba(255,160,60,.7);color:#fff;text-shadow:0 3px 0 #b8330f;animation:glow 2.2s ease-in-out infinite}
 @keyframes glow{50%{box-shadow:0 7px 0 #b8330f,0 0 0 4px #2b2440,0 0 56px rgba(255,190,80,.95)}}
 .wsub{margin:0;color:#fffaf3;font-size:14px;opacity:.92;text-shadow:0 1px 8px rgba(0,0,0,.4)}
 .wrow{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
@@ -155,9 +151,7 @@ button{font:inherit;border:0;cursor:pointer}
     <p class="wtag">Get your time back</p>
   </div>
   <div class="wbot">
-    <div class="wcubes" id="wcubes" aria-hidden="true"></div>
     <button class="go big" id="start">Play</button>
-    <p class="wsub" id="wSub">10 levels</p>
     <div class="wrow"><button class="chip" id="openMap" type="button">Levels</button><button class="chip" id="openHow" type="button">How to play</button><button class="chip" id="mute" type="button">Sound on</button></div>
   </div>
 </div>
@@ -1213,7 +1207,7 @@ function setMute(m){muted=m;try{localStorage.setItem("dta-muted",muted?"1":"0")}
 // returning players pick up where they left off
 function reach(){if(progress.all)return LEVELS.length-1;const st=progress.stars.reduce((m,v,i)=>v>0?Math.max(m,i+1):m,0);return Math.min(LEVELS.length-1,Math.max(progress.unlocked||0,st))}
 function startLabel(){const u=progress.unlocked||0;$("start").textContent="Play";
-  $("wSub").textContent=u>0?"Your progress is in Levels":"10 levels";$("fresh").hidden=!(u>0||progress.stars.some(v=>v>0))}
+  $("fresh").hidden=!(u>0||progress.stars.some(v=>v>0))}
 function renderMap(){const d=$("lvlist");d.innerHTML="";const r=reach(),next=progress.unlocked||0;
   LEVELS.forEach((l,i)=>{if(l.chapter){const h=document.createElement("p");h.className="chap";h.innerHTML=`${ACTS[l.chapter].n} · ${l.chapter}<small>${ACTS[l.chapter].sub}</small>`;d.appendChild(h)}
     const b=document.createElement("button");b.type="button";b.className="lvrow"+(i===next?" next":"");b.disabled=i>r;const st=progress.stars[i]||0;
@@ -1293,7 +1287,6 @@ function frame(){
 buildAppMats();
 requestAnimationFrame(frame);
 // title screen: a row of real app cubes
-$("wcubes").append(...[0,5,10,2,7].map(t=>{return faceCanvas(APPS[t],104)}));
 // card-sheet preview: index.html?card=N opens level N's card straight away
 const cardPreview=new URLSearchParams(location.search).get("card");
 if(cardPreview!==null){$("startO").hidden=true;showIntro(+cardPreview)}
