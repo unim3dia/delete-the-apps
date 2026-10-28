@@ -106,13 +106,17 @@ button{font:inherit;border:0;cursor:pointer}
 @keyframes bob{50%{margin-top:-4px}}
 .clock{font-family:var(--display);font-size:13px!important;letter-spacing:.16em;color:var(--hot);text-transform:uppercase}
 #lvPrev{width:100%;max-width:340px;height:auto;aspect-ratio:2/1;margin:4px 0}
+.lvcard{background:linear-gradient(180deg,#fff7e6,#ffe9c7);border:4px solid #2b2440;box-shadow:0 8px 0 #2b2440,0 24px 50px rgba(20,16,40,.45)}
 .lvcard{width:min(100%,380px);padding:20px 20px 18px;gap:10px}
-.lvcard h2{font-size:44px}
+.lvcard h2{font-size:52px;background:linear-gradient(180deg,#ffe066,#ff9a1f 60%,#ff6a1f);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #2b2440) drop-shadow(0 0 0 #2b2440)}
 .lvtop{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
-.lvpill{margin:0!important;padding:6px 14px;border-radius:999px;background:rgba(43,36,64,.09);font:700 11px var(--body)!important;letter-spacing:.14em;text-transform:uppercase;color:var(--cardink)!important;opacity:1!important}
-.lvpill.clock{font-family:var(--display)!important;font-size:12px!important;color:#fff!important;background:var(--hot)}
-.lvrule{font-size:15px;font-weight:600;max-width:30ch}
-.lvcard .ghost{text-decoration:none;opacity:1;padding:9px 20px;border-radius:999px;background:rgba(43,36,64,.1);font-family:var(--display);text-transform:uppercase;font-size:13px;letter-spacing:.04em;color:var(--cardink)}
+.lvpill{margin:0!important;padding:7px 16px;border-radius:999px;border:3px solid #2b2440;box-shadow:0 3px 0 #2b2440;background:linear-gradient(180deg,#ffe066,#ffb020);font:700 12px var(--body)!important;letter-spacing:.14em;text-transform:uppercase;color:#2b2440!important;opacity:1!important}
+.lvpill.clock{font-family:var(--display)!important;font-size:13px!important;color:#fff!important;text-shadow:0 2px 0 #2b2440;background:linear-gradient(90deg,#34d399,#60a5fa,#c084fc,#f472b6,#fbbf24)}
+.lvrule{font-size:15px;font-weight:700;max-width:30ch;color:#2b2440}
+.lvcard #lvGo{font-size:24px;padding:16px 48px;background:linear-gradient(180deg,#ff8a4c,#ff4d2e);box-shadow:0 6px 0 #b8330f,0 0 0 3px #2b2440;color:#fff;text-shadow:0 2px 0 #b8330f}
+.lvcard #lvGo::after{content:" \25B6";font-size:.75em}
+.lvcard #lvGo:active{box-shadow:0 2px 0 #b8330f,0 0 0 3px #2b2440}
+.lvcard .ghost{text-decoration:none;opacity:1;padding:10px 22px;border-radius:999px;border:3px solid #2b2440;background:linear-gradient(180deg,#7cb4ff,#4a7fd6);box-shadow:0 3px 0 #2b2440;font-family:var(--display);text-transform:uppercase;font-size:13px;letter-spacing:.04em;color:#fff;text-shadow:0 2px 0 #2b2440}
 .stars{font-size:32px;letter-spacing:.12em;color:#f2a91f}
 .go.alt{background:#2b2440;box-shadow:0 5px 0 #120f1c}
 .ghost{background:transparent;color:inherit;text-decoration:underline;font-size:13px;opacity:.7;padding:6px}
@@ -194,7 +198,7 @@ button{font:inherit;border:0;cursor:pointer}
   <p class="clock" id="pTime"></p>
   <h2>Paused</h2>
   <button class="go" id="resume">Resume</button>
-  <div class="row"><button class="ghost" id="restart">Restart level</button><button class="ghost" id="menu">Main menu</button></div>
+  <div class="row"><button class="ghost" id="restart">Restart level</button><button class="ghost" id="menu">Quit</button></div>
   <p class="small">Jump to a level</p>
   <div class="levels" id="pLevels"></div>
   <button class="ghost" id="skip">Skip this level (test)</button>
@@ -1121,9 +1125,11 @@ function drawLevelPreview(l){
   const faceOf=t=>t.f==="grey"?greyFace(a,TS):t.f==="plan"?planFace(0,TS):t.f==="box"?boxFace(0,TS):faceCanvas(a,TS);
   const badge=(x,y,label)=>{g.fillStyle="#fff";g.beginPath();g.arc(x,y,26,0,7);g.fill();g.fillStyle="#ff3b30";g.beginPath();g.arc(x,y,21,0,7);g.fill();
     g.fillStyle="#fff";g.font='700 28px "Instrument Sans", system-ui, sans-serif';g.textAlign="center";g.textBaseline="middle";g.fillText(label,x,y+2)};
-  const arrow=(x1,y1,x2,y2)=>{g.strokeStyle="#ff6a3d";g.lineWidth=8;g.lineCap="round";g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
-    const t=Math.atan2(y2-y1,x2-x1);g.fillStyle="#ff6a3d";g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-22*Math.cos(t-.45),y2-22*Math.sin(t-.45));g.lineTo(x2-22*Math.cos(t+.45),y2-22*Math.sin(t+.45));g.closePath();g.fill()};
+  const arrow=(x1,y1,x2,y2)=>{const gr=g.createLinearGradient(x1,y1,x2,y2);gr.addColorStop(0,"#ffd23f");gr.addColorStop(1,"#ff4fa3");
+    g.strokeStyle=gr;g.lineWidth=9;g.lineCap="round";g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();
+    const t=Math.atan2(y2-y1,x2-x1);g.fillStyle="#ff4fa3";g.beginPath();g.moveTo(x2,y2);g.lineTo(x2-22*Math.cos(t-.45),y2-22*Math.sin(t-.45));g.lineTo(x2-22*Math.cos(t+.45),y2-22*Math.sin(t+.45));g.closePath();g.fill()};
   const burst=(cx,cy,r,col)=>{g.fillStyle=col;g.beginPath();for(let k=0;k<16;k++){const rr=k%2?r*.55:r,t=-Math.PI/2+k*Math.PI/8;g.lineTo(cx+Math.cos(t)*rr,cy+Math.sin(t)*rr)}g.closePath();g.fill()};
+  const sparkle=(x,y,s,col)=>{g.fillStyle=col;g.beginPath();for(let k=0;k<8;k++){const rr=k%2?s*.3:s,t=-Math.PI/2+k*Math.PI/4;g.lineTo(x+Math.cos(t)*rr,y+Math.sin(t)*rr)}g.closePath();g.fill()};
   const ring=(cx,cy)=>{g.fillStyle="rgba(16,16,30,.55)";g.beginPath();g.arc(cx,cy,52,0,7);g.fill();g.strokeStyle="#fff";g.lineWidth=6;g.beginPath();g.arc(cx,cy,40,0,7);g.stroke();
     g.fillStyle="#fff";g.beginPath();g.moveTo(cx,cy);g.arc(cx,cy,33,-Math.PI/2,-Math.PI/2+Math.PI*1.25);g.closePath();g.fill()};
   g.clearRect(0,0,W,H);
@@ -1132,13 +1138,16 @@ function drawLevelPreview(l){
   P.tiles.forEach((t,i)=>{const x=x0+i*(TS+GAP),y=ROW;
     g.save();g.globalAlpha=t.alpha??1;g.translate(x+TS/2,y+TS/2);if(t.flip)g.rotate(Math.PI);g.translate(-TS/2,-TS/2);
     if(t.glow){g.shadowColor=t.glow;g.shadowBlur=34}
-    rrPath(g,0,0,TS,TS,30);g.fillStyle="#fff";g.fill();g.shadowBlur=0;g.clip();g.drawImage(faceOf(t),0,0,TS,TS);g.restore();
+    rrPath(g,0,0,TS,TS,30);g.fillStyle="#fff";g.fill();g.shadowBlur=0;g.lineWidth=6;g.strokeStyle="#2b2440";g.stroke();g.clip();g.drawImage(faceOf(t),0,0,TS,TS);g.restore();
     if(t.badge)badge(x+TS-14,y+14,t.badge)});
   if(P.end==="sea"){g.strokeStyle="#7b9bd2";g.lineWidth=7;g.lineCap="round";for(const yy of[H-34,H-16]){g.beginPath();for(let x=14;x<=W-14;x+=4){const y=yy+Math.sin(x/13)*5;x===14?g.moveTo(x,y):g.lineTo(x,y)}g.stroke()}
     arrow(lastX+14,H/2,W-16,H/2)}
   else if(P.end==="sink"){}
   else if(P.end==="dissolve"){g.fillStyle="#ffd9e6";for(let k=0;k<18;k++){const x=endX+Math.sin(k*2.3)*46,y=endY+Math.cos(k*1.7)*40;g.globalAlpha=.3+.5*(k%3)/2;g.beginPath();g.arc(x,y,4+(k%4)*2,0,7);g.fill()}g.globalAlpha=1;arrow(lastX+14,H/2,endX-60,H/2)}
-  else{arrow(lastX+14,H/2,endX-60,H/2);P.end==="ring"?ring(endX,endY):burst(endX,endY,52,"#ffb020")}
+  else{arrow(lastX+14,H/2,endX-60,H/2);
+    if(P.end==="ring")ring(endX,endY);
+    else{burst(endX,endY,58,"#2b2440");burst(endX,endY,52,"#ffd23f");burst(endX,endY,36,"#ff6a3d")}
+    sparkle(endX+58,endY-52,11,"#f472b6");sparkle(endX-60,endY+50,9,"#34d399");sparkle(endX+62,endY+46,8,"#60a5fa")}
 }
 function rrPath(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()}
 function beginLevel(){$("pauseO").hidden=true;$("levelO").hidden=true;$("endO").hidden=true;$("startO").hidden=true;$("hud").hidden=false;$("dock").hidden=false;setMode("play");hud();tone(440,.12,"sine",.07,880)}
