@@ -27,6 +27,10 @@ body{background:linear-gradient(180deg,var(--skytop) 0%,var(--skyhor) 48%,var(--
 .meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ffd166,var(--hot));border-radius:inherit;transition:width .3s}
 .flash{position:fixed;inset:0;z-index:2;pointer-events:none;box-shadow:inset 0 0 120px 30px rgba(255,60,40,.7);opacity:0;transition:opacity .5s}
 .flash.on{opacity:1;transition:none}
+body.danger .flash{animation:dangerPulse .85s ease-in-out infinite}
+body.danger .meter i{background:#ff3b30}
+@keyframes dangerPulse{0%,100%{opacity:.2}50%{opacity:.8}}
+@media (prefers-reduced-motion: reduce){body.danger .flash{animation:none;opacity:.45}}
 .banner{position:fixed;z-index:6;left:50%;top:calc(env(safe-area-inset-top,0px) + 74px);width:min(calc(100% - 24px),430px);translate:-50% 0;display:flex;gap:14px;align-items:center;padding:15px 18px 15px 15px;border-radius:26px;background:rgba(252,250,255,.97);color:#16141c;box-shadow:0 18px 44px rgba(0,0,0,.38),0 0 0 1px rgba(255,255,255,.6);transform:translateY(calc(-100% - 160px)) scale(.8);transition:transform .55s cubic-bezier(.18,1.7,.4,1);cursor:pointer;box-sizing:border-box}
 .banner.show{transform:none;animation:jolt .6s .35s}
 @keyframes jolt{15%{rotate:-3deg;scale:1.06}35%{rotate:2.5deg}55%{rotate:-1.5deg}75%{rotate:.8deg}100%{rotate:0deg;scale:1}}
@@ -686,35 +690,35 @@ function buildAppMats(){updMats=APPS.map(a=>{const t=new THREE.CanvasTexture(gre
 const ACTS={"Awake":{n:"Act I",sub:"The day you can't put it down"},"Dreams":{n:"Act II",sub:"You fall asleep. The apps follow you in"},"Deep Sleep":{n:"Act III",sub:"The road lets go"}};
 const LEVELS=[
  {name:"Morning",cardTitle:"Match 3",time:"8:41 AM",chapter:"Awake",learn:"the basics",
-  rule:"Match 3 of the same app to delete it for good.",types:[0,1,2,3,4],copies:6,spawn:[1.6,.85],tick:.5,banner:[10,15],
+  rule:"Line up 3 of the same app to delete it.",types:[0,1,2,3,4],copies:6,spawn:[1.6,.85],tick:.5,banner:[10,15],
   sky:{top:"#4f6590",hor:"#8d9cbb"},light:{sun:.82,col:"#fff4e8",hemi:.62,glow:0,stars:0},lift:.4},
  {name:"Afternoon",cardTitle:"Alerts",learn:"notifications",time:"3:12 PM",types:[5,6,7,8,9,11],copies:6,spawn:[1.45,.8],tick:.5,banner:[6,9],badges:.3,
   sky:{top:"#b9705e",hor:"#f0b98a"},light:{sun:.95,col:"#ffd29a",hemi:.55,glow:.05,stars:0},lift:.35,
-  rule:"Tap to clear notification badges so apps can be sent away."},
+  rule:"Tap the red badges away first."},
  {name:"2 A.M.",cardTitle:"Feed",learn:"the algorithm",time:"2:07 AM",types:[0,4,10,2,3,9],copies:5,spawn:[1.35,.75],tick:.45,banner:[10,14],algo:true,algoEvery:[16,24],
   sky:{top:"#0f1328",hor:"#2c3157"},light:{sun:.22,col:"#9fb2ff",hemi:.24,glow:.55,stars:.35},lift:.75,
-  rule:"Recommended apps copy the apps beside them, and the feed speeds up."},
+  rule:"The ✦ app copies its neighbors. Match it fast."},
  {name:"Can't Sleep",cardTitle:"Updates",learn:"updates",time:"2:58 AM",types:[0,1,2,6,4,5,13],copies:5,spawn:[1.3,.7],tick:.42,banner:[9,13],updates:.3,algo:true,algoStart:28,algoEvery:[24,34],
   sky:{top:"#05060f",hor:"#1b1d3d"},light:{sun:.16,col:"#8a9cff",hemi:.18,glow:.7,stars:1},lift:.8,
-  rule:"Apps are updating overnight. A frozen app can't be sent away or matched until its update finishes."},
+  rule:"Grey apps are updating. Wait for them."},
  {name:"Sleeping In",cardTitle:"Flip",learn:"flipping",time:"3:20 AM",chapter:"Dreams",enterH:"You fall asleep.",enterP:"Your eyes close. The apps follow you in.",cue:"The dream shifts.",fresh:true,env:"bed",dream:true,puffy:true,orient:true,types:[0,1,3,4,5,6],copies:6,spawn:[1.65,.85],tick:.5,banner:[10,15],
   sky:{top:"#8a90d4",hor:"#f3d2dc"},light:{sun:.82,col:"#ffe2d6",hemi:.72,glow:.1,stars:.12},lift:.35,
-  rule:"Only apps facing the same way match. Swipe up to flip one. Three upside down count double."},
+  rule:"Apps must face the same way. Swipe up to flip."},
  {name:"Plans",cardTitle:"Plans",learn:"plans",time:"3:34 AM",cue:"The dream shifts.",fresh:true,env:"city",dream:true,puffy:true,plans:6,planBeats:30,types:[9,8,7,1,11,4],copies:5,spawn:[1.5,.8],tick:.48,banner:[8,12],
   sky:{top:"#5a6cc0",hor:"#cbb7e8"},light:{sun:.95,col:"#fff0f4",hemi:.7,glow:.05,stars:.1},lift:.35,
-  rule:"Plain cushions are your plans, not apps. Don't send them away. Bring one to the front and it happens. Leave it stuck too long and it's cancelled."},
+  rule:"Cushions are your plans. Get them to the front."},
  {name:"Deliveries",cardTitle:"Boxes",learn:"containers",time:"3:47 AM",cue:"The dream shifts.",fresh:true,env:"canyon",dream:true,puffy:true,boxes:8,types:[12,0,10,2,5,6],copies:5,spawn:[1.4,.75],tick:.45,banner:[8,12],
   sky:{top:"#7a6cb6",hor:"#f0c4b4"},light:{sun:.92,col:"#ffd8c0",hemi:.62,glow:.05,stars:.1},lift:.35,
-  rule:"Your deliveries arrived all at once. Containers are too heavy to move. Match an app right next to one to open it."},
+  rule:"Match next to a box to open it."},
  {name:"The Sea",cardTitle:"Sea",learn:"the sea",time:"3:59 AM",cue:"The dream shifts.",env:"sea",dream:true,puffy:true,sea:true,waves:[8,12],surge:[13,7,.6,1.2],fastDrop:true,types:[0,1,2,4,6,7,13],copies:6,spawn:[1.05,.6],tick:.36,banner:[9,13],
   sky:{top:"#4d68b0",hor:"#c4c0e6"},light:{sun:.9,col:"#fff0ea",hemi:.72,glow:.05,stars:.12},lift:.35,
-  rule:"Swipe an app off the edge to delete it."},
+  rule:"Swipe apps off the edge."},
  {name:"Sinking",cardTitle:"Cushions",learn:"soft cushions",time:"4:12 AM",chapter:"Deep Sleep",enterH:"Deeper.",enterP:"The dreams thin out. The road goes soft as a mattress.",fresh:true,env:"night",deep:true,soft:[[1,0],[0,2],[2,2]],types:[0,1,4,7,9,10],copies:4,spawn:[1.55,.85],tick:.5,banner:[14,20],
   sky:{top:"#0a0f2e",hor:"#2b3062"},light:{sun:.4,col:"#b8c4ff",hemi:.38,glow:.55,stars:1},lift:.5,
-  rule:"An app that stops on a glowing cushion sinks and gets stuck. Roll a matching app onto it and the cushion takes both."},
+  rule:"Glowing cushions trap apps. Roll a twin onto them."},
  {name:"REM",cardTitle:"Letting Go",learn:"letting go",time:"4:44 AM",cue:"Deeper still.",fresh:true,env:"sky",deep:true,rem:true,puffy:true,noBanner:true,types:[0,2,3,5,6,13],copies:5,spawn:[1.35,.75],tick:.46,banner:[30,40],
   sky:{top:"#2c2860",hor:"#a07fb8"},light:{sun:.72,col:"#ffd9e6",hemi:.62,glow:.25,stars:.6},lift:1,
-  rule:"Every match dissolves a row of road. Anything that rolls off the edge is gone."}
+  rule:"Every match drops a row of road."}
 ];
 const MORNING_LIGHT=LEVELS[0].light,DAWN_LIGHT={sun:.95,col:"#fff1dc",hemi:.75,glow:0,stars:0},DUSK_LIGHT={sun:.4,col:"#c9a0ff",hemi:.4,glow:.3,stars:.2};
 
@@ -725,6 +729,8 @@ const cubes=[],shards=[];
 let mode="attract",started=false,over=true,lvl=0,L=LEVELS[0],TYPES=L.types;
 // closing only sends an app away for a while, so each level gets a small budget; every match earns one back
 const CLOSE_LIMIT=6,CLOSE_CAP=9,FIRST_PLAN_HOLD=3.5;
+// tension: an overflow costs extra, a nearly full lane or phone sets off the danger pulse, and each level has one rush
+const OVERFLOW_EXTRA=20,DANGER_ROWS=NROWS-2,DANGER_AT=.75,RUSH_COUNT=5,RUSH_GAP=450;
 let closesLeft=CLOSE_LIMIT;
 let queue=[],remaining={},uninstalled=0,closes=0,shoves=0,drops=0,chain=0,lastMatch=-9,dirty=false,freed=false;
 let elapsed=0,screen=0,spawnT=0,tickT=0,bannerT=12,bannerApp=-1,algoT=18,hintT=0,clockT=0,hints={},script=[],againAction=null;
@@ -756,6 +762,9 @@ const ST={
   RESTING:["idle","bump"]                              // on a cell and not travelling
 };
 const playing=()=>mode==="play";
+// level 1 holds everything back until the first match (or TEACH_MAX seconds, so nobody gets stuck)
+const TEACH_MAX=40,TEACH_HINT="Swipe it left, next to its twins ←";
+const teaching=()=>playing()&&lvl===0&&!hints.matched&&elapsed<TEACH_MAX;
 const diff=()=>Math.min(1,Math.max(elapsed/150,uninstalled/Math.max(1,TYPES.length)*.9));
 // the sea breathes: surges of fast play, then short lulls
 const pace=()=>{if(!L.surge||!playing())return 1;return elapsed%L.surge[0]<L.surge[1]?L.surge[2]:L.surge[3]};
@@ -836,6 +845,7 @@ function finishUpdate(c){c.upd=0;c.mesh.material=appMats[c.type];if(c.pie){scene
 const updRoll=()=>L.updates&&Math.random()<L.updates?8+Math.floor(Math.random()*4):0;
 const badgeRoll=()=>L.badges&&Math.random()<L.badges?2+Math.floor(Math.random()*2):0;
 function spawnNext(){
+  if(teaching())return;
   const lane=pickLane();let type;
   if(!started)type=TYPES[Math.floor(Math.random()*TYPES.length)];
   else{if(!queue.length)return;const back=grid[lane][lastIn(lane)];let i=0;
@@ -963,7 +973,7 @@ function cancelPlan(c){freeCell(c);if(c.ring){scene.remove(c.ring);c.ring=null}c
 function install(c){
   freeCell(c);c.state="install";c.t=0;c.p0=c.mesh.position.clone();if(c.tag){scene.remove(c.tag);c.tag=null}
   if(!playing())return;
-  requeue(c.type);const a=APPS[c.type];screen+=a[3];toast(`Overflow! ${a[0]} +${a[3]}m`);
+  requeue(c.type);const a=APPS[c.type],cost=a[3]+OVERFLOW_EXTRA;screen+=cost;toast(`Overflow! ${a[0]} +${cost}m`,1.6);
   $("flash").classList.add("on");setTimeout(()=>$("flash").classList.remove("on"),60);
   tone(660,.18,"sine",.08,990);setTimeout(()=>tone(990,.2,"sine",.06,1320),110);
   hud();if(screen>=MAXMIN)lose();
@@ -983,6 +993,7 @@ function doMatch(grp){
   grp.forEach(c=>{c.state="match";c.t=0});
   if(!playing())return;
   remaining[type]-=n;closesLeft=Math.min(CLOSE_CAP,closesLeft+1);
+  if(lvl===0&&!hints.matched){hints.matched=1;hideCallout();spawnT=1.4;setTimeout(()=>{if(playing())toast("Deleted for good. Keep going!",2.6)},500)}
   screen=Math.max(0,screen-Math.round(a[3]*n/3*chain));
   const boxes=new Set();grp.forEach(c=>neighbors(c).forEach(y=>{if(y.kind==="box"&&ST.RESTING.includes(y.state))boxes.add(y)}));
   let dbl=0;if(L.orient&&grp[0].flip===1){dbl=removeCopies(type,n,grp);remaining[type]-=dbl;screen=Math.max(0,screen-Math.round(a[3]*dbl/3))}
@@ -995,8 +1006,21 @@ function doMatch(grp){
   if(L.rem)setTimeout(dissolveNext,450);
   if(remaining[type]<=0)typeDone(type);
 }
+// halfway through a level the apps fight back: a burst of arrivals, once
+function startRush(){hints.rush=1;const at=lvlTok,live=()=>playing()&&lvlTok===at;
+  setTimeout(()=>{if(!live())return;toast("Rush! Here they come",2.4);[880,660,880,660].forEach((f,i)=>setTimeout(()=>tone(f,.14,"square",.05),i*160));
+    for(let k=0;k<RUSH_COUNT;k++)setTimeout(()=>{if(live()&&queue.length)spawnNext()},700+k*RUSH_GAP)},1100)}
+// a lane stacked DANGER_ROWS deep, or a nearly full phone: red pulse and a heartbeat until it is dealt with
+let beatT=0;
+const laneDeep=l=>{for(let r=0;r<DANGER_ROWS;r++){const c=grid[l][r];if(!c||c.state!=="idle")return false}return true};
+function stepDanger(dt){
+  const deep=playing()&&[0,1,2].some(laneDeep),hot=playing()&&screen>=MAXMIN*DANGER_AT,on=deep||hot;
+  document.body.classList.toggle("danger",on);if(!on){beatT=0;return}
+  if(!hints.danger){hints.danger=1;toast(deep?"Almost full! Match or drop":"Phone almost full!",2.4)}
+  beatT-=dt;if(beatT<=0){beatT=.85;tone(64,.12,"sine",.09);setTimeout(()=>tone(58,.1,"sine",.06),150)}}
 function typeDone(type){
   const a=APPS[type];uninstalled++;if(!toastLock)toast(`${a[0]} deleted`);
+  if(playing()&&lvl>0&&!L.sea&&!L.rem&&!hints.rush&&uninstalled===Math.ceil(TYPES.length/2))startRush();
   setTimeout(()=>{noise(.3,.2,3000);tone(1568,.5,"sine",.05)},300);dockGone(type);
   setMood(mixSky(L.sky,DAWN,uninstalled/TYPES.length*L.lift),null,2.2);hud();
   if(uninstalled>=TYPES.length){const at=lvl;setTimeout(()=>{if(lvl===at&&uninstalled>=TYPES.length)levelDone()},650)}
@@ -1010,6 +1034,7 @@ function crushBox(b){if(b.state==="dead")return;explode(b,true);remove(b);noise(
 function flipCube(c){if(c.state!=="idle"||c.kind)return;c.state="flip";c.t=0;tone(620,.1,"sine",.05,880);noise(.1,.08,2400)}
 function close(c,flick){
   if(!ST.LIVE.includes(c.state))return;
+  if(teaching()){c.squash=1;tone(180,.1,"triangle",.04);showCallout(c,c.tut?TEACH_HINT:"Line up 3 to delete",2.2);return}
   if(c.algo){c.squash=1;tone(110,.2,"sawtooth",.05,80);showCallout(c,"You can't close the algorithm",2);return}
   if(c.kind==="box"){c.squash=1;tone(90,.15,"square",.05);showCallout(c,"Too heavy. Match next to it.",1.8);return}
   if(c.kind==="plan"){c.squash=1;tone(520,.1,"sine",.05);showCallout(c,"That's a plan. Get it to the front ↓",1.8);return}
@@ -1139,8 +1164,9 @@ function stepCallout(){if(!co)return;if(clockT>co.until||co.c.state==="dead"){hi
   el.style.left=Math.max(90,Math.min(innerWidth-90,(v.x+1)/2*innerWidth))+"px";el.style.top=((1-v.y)/2*innerHeight)+"px"}
 function hintCheck(){
   if(co)return;const idle=cubes.filter(c=>c.state==="idle");
+  if(teaching()){const c=idle.find(x=>x.tut);if(c)showCallout(c,TEACH_HINT,TEACH_MAX);return}
   if(lvl===0){
-    if(!hints.tap&&closes===0&&idle.length){hints.tap=1;showCallout(idle[0],DESK?"Double-click to fling it away":"Tap to close",3);return}
+    if(!hints.tap&&closes===0&&elapsed>14&&idle.length>3){hints.tap=1;showCallout(idle[idle.length-1],DESK?"In the way? Double-click to fling it":"In the way? Tap to send it away",4);return}
     if(!hints.pair&&elapsed>5)for(const c of idle){if(remaining[c.type]<3)continue;
       const nb=neighbors(c).filter(x=>x.state==="idle"&&x.type===c.type);
       if(nb.length===1&&neighbors(nb[0]).filter(x=>x.type===c.type).length===1){hints.pair=1;showCallout(c,`One more ${APPS[c.type][0]} deletes them`,3.4);return}}
@@ -1236,6 +1262,10 @@ function setupLevel(i){
   setMood(L.sky,L.light,1.8);buildDock();$("dock").classList.toggle("many",TYPES.length>6);hud();
   // scripted first encounters: the new thing arrives alone, before the crowd
   script=[];
+  // level 1 opens on a board where the only move is the match: two twins at the front, the third one swipe away
+  if(i===0){let A;script.push({at:.3,fn:()=>{A=takeFromQueue(x=>x>=0);const B=takeFromQueue(x=>x>=0&&x!==A);takeFromQueue(x=>x===A);takeFromQueue(x=>x===A);
+      spawn(A,0,{row:0});spawn(A,1,{row:0});spawn(B,2,{row:0})}},
+    {at:1.3,fn:()=>{const c=spawn(A,2,{row:1});if(c)c.tut=true}})}
   if(i===1)script.push({at:.3,fn:()=>{const t=takeFromQueue(()=>true);setBadge(spawn(t,1),3)}});
   if(i===3){let A;script.push({at:.2,fn:()=>{A=queue[0];takeFromQueue(x=>x===A);spawn(A,1,{upd:13})}},
     {at:.9,fn:()=>{takeFromQueue(x=>x===A);spawn(A,0)}},{at:1.3,fn:()=>{takeFromQueue(x=>x===A);spawn(A,2)}})}
@@ -1487,7 +1517,7 @@ function frame(){
       hintT-=dt;if(hintT<=0){hintT=.4;hintCheck()}}
   }
   if(mode!=="pause"){cubes.slice().forEach(c=>stepCube(c,dt,t));if(dirty){dirty=false;checkMatches()}stepShards(dt);stepWave(dt);stepRoad(dt,t)}stepSun(dt);
-  cubes.forEach(c=>stepTags(c,t));stepMood(dt);stepCallout();
+  cubes.forEach(c=>stepTags(c,t));stepMood(dt);stepCallout();stepDanger(dt);
   if(introCam<1){introCam=Math.min(1,introCam+dt/4);const e=1-Math.pow(1-introCam,3);camera.position.lerpVectors(CAM0,CAM,e);camera.lookAt(LOOK)}
   if(shakeT>0){shakeT=Math.max(0,shakeT-dt);camera.position.x=CAM.x+Math.sin(t*85)*.07*shakeT/.3;camera.position.y=CAM.y+Math.cos(t*70)*.04*shakeT/.3}
   if(water.visible){wTex.offset.y=(wTex.offset.y-dt*.035)%1;wTex.offset.x=Math.sin(t*.25)*.03}
