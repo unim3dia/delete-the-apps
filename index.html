@@ -731,7 +731,30 @@ let elapsed=0,screen=0,spawnT=0,tickT=0,bannerT=12,bannerApp=-1,algoT=18,hintT=0
 let progress={unlocked:0,stars:[0,0,0,0]};
 try{const p=JSON.parse(localStorage.getItem("dta-progress")||"null");if(p&&typeof p.unlocked==="number"&&Array.isArray(p.stars)){progress=p;while(progress.stars.length<LEVELS.length)progress.stars.push(0);if(progress.done&&!progress.d4){progress.unlocked=3;progress.d4=1}if(progress.stars[3]>0&&!progress.d5){progress.unlocked=4;progress.d5=1}if(!progress.d6){const sv=progress.stars[4]||0;progress.stars[4]=0;progress.stars[7]=Math.max(progress.stars[7]||0,sv);if(progress.unlocked>4)progress.unlocked=4;progress.d6=1}if(!progress.d7){if((progress.stars[7]||0)>0)progress.unlocked=Math.max(progress.unlocked||0,8);progress.d7=1}}}catch(e){}
 const save=()=>{try{localStorage.setItem("dta-progress",JSON.stringify(progress))}catch(e){}};
-function setMode(m){mode=m;started=m!=="attract";over=m!=="play"}
+// ---------- game flow: the game is always in exactly one mode ----------
+// FLOW lists where each mode may go next. An unlisted move still happens (never break play) but is warned in the console.
+const FLOW={
+  attract:["intro"],                // title screen -> level card
+  intro:["play","attract"],         // level card -> play, or back to the title
+  play:["pause","end","attract"],
+  pause:["play","attract"],         // resume or restart, or quit
+  end:["intro","play","attract"]    // next card, replay, or the title
+};
+let flowTok=0;
+function setMode(m){
+  if(m!==mode&&!FLOW[mode]?.includes(m))console.warn(`[flow] unexpected ${mode} -> ${m}`);
+  mode=m;started=m!=="attract";over=m!=="play";flowTok++;document.body.dataset.mode=m}
+// a delayed step that only runs if the game is still in the mode that scheduled it
+const afterMode=(ms,fn)=>{const tok=flowTok;setTimeout(()=>{if(tok===flowTok)fn()},ms)};
+
+// ---------- cube lifecycle: which states each rule applies to ----------
+// air -> settle -> idle <-> move / bump / flip / convert; idle -> match | close | float | deflate | sea | swallow | fall | install -> dead
+const CUBE_STATES=["air","settle","idle","bump","move","convert","match","close","flip","float","deflate","sea","swallow","fall","install","dead"];
+const ST={
+  LIVE:["idle","air","settle","move","bump","flip"],  // on the road and still the player's to act on
+  TICKING:["idle","move","bump"],                      // on a cell: plans and updates count down here
+  RESTING:["idle","bump"]                              // on a cell and not travelling
+};
 const playing=()=>mode==="play";
 const diff=()=>Math.min(1,Math.max(elapsed/150,uninstalled/Math.max(1,TYPES.length)*.9));
 // the sea breathes: surges of fast play, then short lulls
@@ -881,9 +904,9 @@ function stepCube(c,dt,t){
   if(c.squash>0){c.squash=Math.max(0,c.squash-dt*5);const q=Math.sin(c.squash*Math.PI)*.12;m.scale.set(S*(1+q),S*(1-q),S*(1+q))}else m.scale.setScalar(S);
 }
 function tick(){
-  if(playing())cubes.forEach(c=>{if(c.kind!=="plan"||c.row==null||!["idle","move","bump"].includes(c.state))return;
+  if(playing())cubes.forEach(c=>{if(c.kind!=="plan"||c.row==null||!ST.TICKING.includes(c.state))return;
     if(c.state==="idle"&&c.row===0){if(c.firstPlan&&holdFirstPlan(c))return;happen(c);return}if(--c.planLeft<=0)cancelPlan(c);else drawRing(c)});
-  if(playing())cubes.forEach(c=>{if(c.upd>0&&c.row!=null&&["idle","move","bump"].includes(c.state)){c.upd--;if(c.upd>0)drawPie(c);else finishUpdate(c)}});
+  if(playing())cubes.forEach(c=>{if(c.upd>0&&c.row!=null&&ST.TICKING.includes(c.state)){c.upd--;if(c.upd>0)drawPie(c);else finishUpdate(c)}});
   for(let l=0;l<3;l++)for(let r=0;r<NROWS;r++){const c=grid[l][r];if(!c||c.state!=="idle")continue;
     if(L.rem&&edge>0&&r<=edge&&playing()){fallOff(c);continue}
     if(c.sunk)continue;
@@ -915,7 +938,7 @@ function fallOff(c){freeCell(c);if(c.tag){scene.remove(c.tag);c.tag=null}c.state
   tone(rnd(420,520),.5,"sine",.045,140);puff(c.mesh.position);
   if(!playing())return;credit(c.type,1,hints.fell?null:"Let it go");hints.fell=1}
 function dissolveNext(){if(!L.rem||edge>=MAXE||!playing())return;dissolveRoadRow(edge+3);edge++;
-  for(let l=0;l<3;l++){const c=grid[l][edge-1];if(c&&["idle","bump"].includes(c.state))fallOff(c)}
+  for(let l=0;l<3;l++){const c=grid[l][edge-1];if(c&&ST.RESTING.includes(c.state))fallOff(c)}
   noise(.6,.1,700);tone(262,.6,"sine",.04,196);if(!hints.dis){hints.dis=1;setTimeout(()=>toast("The road lets go"),300)}}
 
 // the algorithm: turns one neighbour into more of the same
@@ -961,7 +984,7 @@ function doMatch(grp){
   if(!playing())return;
   remaining[type]-=n;closesLeft=Math.min(CLOSE_CAP,closesLeft+1);
   screen=Math.max(0,screen-Math.round(a[3]*n/3*chain));
-  const boxes=new Set();grp.forEach(c=>neighbors(c).forEach(y=>{if(y.kind==="box"&&["idle","bump"].includes(y.state))boxes.add(y)}));
+  const boxes=new Set();grp.forEach(c=>neighbors(c).forEach(y=>{if(y.kind==="box"&&ST.RESTING.includes(y.state))boxes.add(y)}));
   let dbl=0;if(L.orient&&grp[0].flip===1){dbl=removeCopies(type,n,grp);remaining[type]-=dbl;screen=Math.max(0,screen-Math.round(a[3]*dbl/3))}
   [523,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f*Math.pow(1.122,chain-1),.22,"sine",.06),i*55));
   if(hadAlgo){toast(hints.beat?"Algorithm deleted":"You beat the algorithm");hints.beat=1}
@@ -981,12 +1004,12 @@ function typeDone(type){
 let toastLock=false;
 function removeCopies(type,k,skip){let n=0;
   while(n<k){const i=queue.indexOf(type);if(i<0)break;queue.splice(i,1);n++}
-  for(const c of cubes.slice()){if(n>=k)break;if(c.type!==type||skip.includes(c)||!["idle","air","settle","move","bump","flip"].includes(c.state))continue;explode(c);remove(c);n++}
+  for(const c of cubes.slice()){if(n>=k)break;if(c.type!==type||skip.includes(c)||!ST.LIVE.includes(c.state))continue;explode(c);remove(c);n++}
   return n}
 function crushBox(b){if(b.state==="dead")return;explode(b,true);remove(b);noise(.3,.25,1200);tone(110,.25,"square",.05,60);dirty=true}
 function flipCube(c){if(c.state!=="idle"||c.kind)return;c.state="flip";c.t=0;tone(620,.1,"sine",.05,880);noise(.1,.08,2400)}
 function close(c,flick){
-  if(!["idle","air","settle","move","bump","flip"].includes(c.state))return;
+  if(!ST.LIVE.includes(c.state))return;
   if(c.algo){c.squash=1;tone(110,.2,"sawtooth",.05,80);showCallout(c,"You can't close the algorithm",2);return}
   if(c.kind==="box"){c.squash=1;tone(90,.15,"square",.05);showCallout(c,"Too heavy. Match next to it.",1.8);return}
   if(c.kind==="plan"){c.squash=1;tone(520,.1,"sine",.05);showCallout(c,"That's a plan. Get it to the front ↓",1.8);return}
@@ -1086,7 +1109,7 @@ function stepShards(dt){
 // ---------- input: tap / flick up = close, swipe sideways = slide lanes ----------
 const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();
 function pick(x,y){
-  const live=cubes.filter(c=>["idle","air","settle","move","bump","flip"].includes(c.state));
+  const live=cubes.filter(c=>ST.LIVE.includes(c.state));
   ndc.set(x/innerWidth*2-1,-(y/innerHeight)*2+1);ray.setFromCamera(ndc,camera);
   const hit=ray.intersectObjects(live.map(c=>c.mesh))[0];if(hit)return live.find(c=>c.mesh===hit.object);
   let best=1e9,c=null;const v=new THREE.Vector3();
@@ -1331,9 +1354,9 @@ function levelDone(){
     $("endp").textContent=`${fmt(screen)} of screen time. `+(nx.enterP||nx.cue||`It's ${nx.time} and they're back.`);
     $("next").textContent=`Next: ${LEVELS[lvl+1].name}`;$("next").hidden=false;$("again").textContent="Replay";againAction=()=>{setupLevel(lvl);beginLevel()};
     const statHtml=`Level ${lvl+1} cleared`;
-    setTimeout(()=>{showIntro(lvl+1);$("lvStat").innerHTML=statHtml;$("lvStat").hidden=false},1500);
+    afterMode(1500,()=>{showIntro(lvl+1);$("lvStat").innerHTML=statHtml;$("lvStat").hidden=false});
   }else{
-    freed=true;setMood(DAWN,DAWN_LIGHT,4);setTimeout(()=>{$("hud").hidden=true},2000);$("endAct").hidden=true;
+    freed=true;setMood(DAWN,DAWN_LIGHT,4);afterMode(2000,()=>{$("hud").hidden=true});$("endAct").hidden=true;
     $("veil").className="veil";if(L.rem){for(let k=edge+3,j=0;k<ROWS;k++,j++)dissolveRoadRow(k,500+j*120);sunG.visible=true;sunT=0}
     const daily=ALL_TYPES.reduce((s,t)=>s+APPS[t][3],0);dayBack=daily;
     $("endh").textContent="Nothing left.";$("endstat").textContent=`${fmt(daily)} a day, back.`;
@@ -1341,7 +1364,7 @@ function levelDone(){
     $("last").textContent=L.sea?"Throw it in the sea":"Delete this game";
     $("last").hidden=false;$("last").classList.remove("boom","sink");$("share").hidden=false;$("again").textContent=L.sea?"Play the week again":"Play the day again";
     againAction=()=>{setupLevel(0);beginLevel()};
-    setTimeout(()=>{$("endO").hidden=false},2400);
+    afterMode(2400,()=>{$("endO").hidden=false});
   }
 }
 let dayBack=0;
@@ -1350,7 +1373,7 @@ function lose(){
   $("endAct").hidden=true;$("endh").textContent="Phone full.";$("endstat").textContent=`${fmt(screen)} on your phone.`;
   $("endp").textContent=`No room for more apps. You deleted ${uninstalled} of ${TYPES.length}. Sending them away didn't count.`;
   $("share").hidden=true;$("next").hidden=true;$("last").hidden=true;$("again").textContent="Try again";againAction=()=>{setupLevel(lvl);beginLevel()};
-  setTimeout(()=>{$("endO").hidden=false},900);
+  afterMode(900,()=>{$("endO").hidden=false});
 }
 let masterG=null;
 const initAudio=()=>{try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(!masterG){masterG=ac.createGain();masterG.gain.value=muted?0:1;masterG.connect(ac.destination)}}catch(e){}};
@@ -1395,7 +1418,7 @@ $("pause").addEventListener("pointerdown",e=>e.stopPropagation());
 $("resume").addEventListener("click",resumeGame);
 $("restart").addEventListener("click",()=>{setupLevel(lvl);beginLevel()});
 $("menu").addEventListener("click",toMenu);$("endMenu").addEventListener("click",toMenu);
-addEventListener("keydown",e=>{if(e.key==="Escape"||e.key==="p"){if(playing())pauseGame();else if(mode==="pause")resumeGame()}
+addEventListener("keydown",e=>{if(e.key==="Escape"||e.key==="p"){if(playing())pauseGame();else if(mode==="pause")resumeGame();else if(e.key==="Escape"){if(!$("mapO").hidden)$("mapBack").click();else if(!$("howO").hidden)$("howBack").click()}}
   if(e.key==="m"||e.key==="M")setMute(!muted)});
 document.addEventListener("visibilitychange",()=>{if(document.hidden)pauseGame()});
 $("fresh").addEventListener("click",()=>{progress.unlocked=0;save();startLabel();goLevel(0)});
@@ -1412,6 +1435,40 @@ $("share").addEventListener("click",async()=>{
   try{if(navigator.share){await navigator.share({text});return}}catch(e){if(e&&e.name==="AbortError")return}
   try{await navigator.clipboard.writeText(text);toast("Copied")}catch(e){toast("Couldn't share")}
 });
+
+// ---------- screens: which overlay is up ----------
+// Overlays are toggled in many places; this watches them, mirrors the one that is up on <body data-screen>
+// and moves keyboard focus to its main button.
+const SCREENS={startO:"start",mapO:"levels",howO:"how",levelO:"card",pauseO:"pause",endO:"end"};
+const MAIN_BUTTON={startO:["start"],mapO:["mapBack"],howO:["howBack"],levelO:["lvGo"],pauseO:["resume"],endO:["next","again"]};
+const screensUp=()=>Object.keys(SCREENS).filter(id=>!$(id).hidden);
+const currentScreen=()=>SCREENS[screensUp()[0]]||"none";
+let lastScreen="none";
+function syncScreen(){
+  const up=screensUp();if(up.length>1)console.warn("[screen] overlapping:",up.join(", "));
+  const id=up[0],name=currentScreen();document.body.dataset.screen=name;
+  if(name===lastScreen)return;lastScreen=name;
+  const btn=id&&MAIN_BUTTON[id].map($).find(b=>!b.hidden);if(btn)btn.focus({preventScroll:true})}
+const screenWatch=new MutationObserver(syncScreen);
+Object.keys(SCREENS).forEach(id=>screenWatch.observe($(id),{attributes:true,attributeFilter:["hidden"]}));syncScreen();
+
+// ---------- agent handle: read what the game is doing without screenshots ----------
+// dta.state() snapshots every machine; dta.check() lists broken invariants (empty means healthy).
+const SCREEN_FOR_MODE={attract:["start","levels","how"],intro:["card"],play:["none"],pause:["pause"],end:["none","end"]};
+window.dta={
+  flow:FLOW,cubeStates:CUBE_STATES,
+  state(){return{mode,screen:currentScreen(),level:lvl+1,name:L.name,elapsed:+elapsed.toFixed(1),deleted:uninstalled,of:TYPES.length,
+    closesLeft,screenTime:screen,muted,cubes:cubes.filter(c=>c.state!=="dead").map(c=>({lane:c.lane,row:c.row,state:c.state,kind:c.kind||"app",type:c.type}))}},
+  check(){const bad=[],up=screensUp(),name=currentScreen();
+    if(up.length>1)bad.push(`overlays overlap: ${up.join(", ")}`);
+    if(!SCREEN_FOR_MODE[mode].includes(name))bad.push(`mode ${mode} shows screen ${name}`);
+    if((mode==="play"||mode==="pause")&&$("hud").hidden)bad.push(`hud hidden during ${mode}`);
+    if((mode==="attract"||mode==="intro")&&!$("hud").hidden)bad.push(`hud shown during ${mode}`);
+    if(closesLeft<0||closesLeft>CLOSE_CAP)bad.push(`closesLeft ${closesLeft} out of range`);
+    cubes.forEach(c=>{if(!CUBE_STATES.includes(c.state))bad.push(`unknown cube state "${c.state}"`)});
+    for(let l=0;l<3;l++)for(let r=0;r<NROWS;r++){const c=grid[l][r];if(c&&(c.lane!==l||c.row!==r||c.state==="dead"))bad.push(`grid ${l},${r} holds a ${c.state} cube at ${c.lane},${c.row}`)}
+    return bad}
+};
 
 // ---------- loop ----------
 function resize(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.fov=w<h?62:44;camera.updateProjectionMatrix()}
